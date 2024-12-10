@@ -39,7 +39,7 @@ export const ProjectCount = () => {
       color="primary"
       className="flex items-center gap-1"
     >
-      <span>{account.address} DIN Project Count <Code>{projectCount ?? '?'}</Code></span>
+      <span>{account.address} DIN Project Count <Code><>{projectCount ?? '?'}</></Code></span>
     </Button>
   );
 };

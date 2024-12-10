@@ -25,5 +25,5 @@ export function WagmiCompoment() {
 
   if (error) return <code>{error.message}</code>
 
-  return <div>Max Score is <Code>{maxScore}</Code> total number of projects <Code>{projectCount}</Code></div>
+  return <div>Max Score is <Code><>{maxScore}</></Code> total number of projects <Code><>{projectCount}</></Code></div>
 }

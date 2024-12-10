@@ -62,7 +62,7 @@ export const siteConfig = {
     //   label: "Logout",
     //   href: "/logout",
     // },
-  ],
+  ] as { label: string; href: string }[],
   links: {
     github: "https://github.com/Doctelligence",
     twitter: "https://x.com/doctelligence",
