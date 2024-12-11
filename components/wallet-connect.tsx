@@ -15,7 +15,6 @@ import { Code } from "@nextui-org/code";
 export const ConnectWallet = () => {
   const { connect, connectors, ...args } = useConnect();
   const { address, isConnected } = useAccount();
-  // const {} = useEnsName(address);
 
   if (isConnected) {
     return (
