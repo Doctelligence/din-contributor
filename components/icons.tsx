@@ -158,6 +158,26 @@ export const HeartFilledIcon = ({
   </svg>
 );
 
+export const PlugIcon = (props: IconSvgProps) => (
+<svg 
+  aria-hidden="true"
+  fill="none"
+  focusable="false"
+  height="1em"
+  role="presentation"
+  viewBox="0 0 24 24"
+  width="1em"
+  {...props}
+>
+  <rect stroke="currentColor" x="8" y="12" width="8" height="10" rx="1" ry="1" fill="#555" />
+  
+  <rect stroke="currentColor" x="9.5" y="4" width="1.5" height="8" fill="#999" />
+  <rect stroke="currentColor" x="13" y="4" width="1.5" height="8" fill="#999" />
+  
+  <path stroke="currentColor" d="M12,22 Q12,24 16,24" stroke-width="0.5" fill="none" />
+</svg>
+)
+
 export const SearchIcon = (props: IconSvgProps) => (
   <svg
     aria-hidden="true"
