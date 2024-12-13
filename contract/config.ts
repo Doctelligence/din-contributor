@@ -2,8 +2,8 @@ import { http, createConfig } from 'wagmi'
 import { mainnet, sepolia } from 'wagmi/chains'
 import { metaMask } from 'wagmi/connectors'
 
-// @ts-ignore
 export const config = createConfig({
+  ssr: true,
   chains: [sepolia],
   connectors: [metaMask({
     dappMetadata: { 

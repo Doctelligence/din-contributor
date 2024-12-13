@@ -68,6 +68,6 @@ export const siteConfig = {
     twitter: "https://x.com/doctelligence",
     docs: "https://doctelligence.com",
     discord: "https://discord.com/invite/Z5592FHb",
-    // sponsor: "https://patreon.com/jrgarciadev",
+    slack: "https://doctelligence.slack.com",
   },
 };

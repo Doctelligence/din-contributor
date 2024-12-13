@@ -11,6 +11,8 @@ import { useAccount, useReadContract, useWriteContract } from "wagmi";
 import { Code } from "@nextui-org/code";
 
 export const ProjectCount = () => {
+  console.log('PROJECT CALLED CALLED')
+
    const account = useAccount();
 
   const { data: projectCount } = useReadContract({
@@ -25,7 +27,13 @@ export const ProjectCount = () => {
     functionName: 'projects',
   });
 
-  console.log(account.address, createProject.data);
+  const createdProject = useReadContract({
+    address: CONTRACT_ADDRESS,
+    abi,
+    functionName: 'createProject',
+  });
+
+  console.log('CALLING ADDRESSES', account.address, createProject.data, createdProject);
 
   // const { data } = useWriteContract({
   //   config: {

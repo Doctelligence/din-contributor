@@ -1,13 +1,10 @@
 "use client";
 
 import { Button } from "@nextui-org/button";
-
-import {
-  HeartFilledIcon
-} from "@/components/icons";
+import { useCallback, useState } from "react";
 import { CONTRACT_ADDRESS } from "@/contract/config";
 import abi from "@/contract/abi";
-import { useReadContract } from "wagmi";
+import { useReadContract, useWriteContract } from "wagmi";
 import { Code } from "@nextui-org/code";
 
 export function WagmiCompoment() {

@@ -18,7 +18,8 @@ import {
   DiscordIcon,
   GithubIcon,
   SearchIcon,
-  TwitterIcon
+  TwitterIcon,
+  SlackIcon,
 } from "@/components/icons";
 import { ThemeSwitch } from "@/components/theme-switch";
 import { ProjectCount } from "@/components/project-counter";
@@ -92,6 +93,9 @@ export const Navbar = () => {
         <NavbarItem className="hidden sm:flex gap-2">
           {/* <ProjectCount /> */}
           <ConnectWallet />
+          <Link isExternal aria-label="Slack" href={siteConfig.links.slack}>
+            <SlackIcon className="text-default-500" />
+          </Link>
           <Link isExternal aria-label="Twitter" href={siteConfig.links.twitter}>
             <TwitterIcon className="text-default-500" />
           </Link>

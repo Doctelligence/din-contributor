@@ -7,6 +7,7 @@ import { siteConfig } from "@/config/site";
 import { title, subtitle } from "@/components/primitives";
 import { GithubIcon } from "@/components/icons";
 import { WagmiCompoment } from "@/components/wallet";
+import { CreateContractButton } from "@/components/create-project";
 
 export default function Home() {
   return (
@@ -43,6 +44,7 @@ export default function Home() {
           <GithubIcon size={20} />
           GitHub
         </Link>
+        <CreateContractButton />
       </div>
 
       <div className="mt-8">
