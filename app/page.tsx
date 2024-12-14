@@ -44,6 +44,9 @@ export default function Home() {
           <GithubIcon size={20} />
           GitHub
         </Link>
+      </div>
+
+      <div className="flex gap-3">
         <CreateContractButton />
       </div>
 

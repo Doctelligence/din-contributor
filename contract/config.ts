@@ -17,4 +17,4 @@ export const config = createConfig({
   },
 });
 
-export const CONTRACT_ADDRESS = '0x085b721dA12D70115B275174743dF90A1E3e44B4';
+export const CONTRACT_ADDRESS = '0xe44706D243C504aF2383B2eF97Fb63e32C6C4679';

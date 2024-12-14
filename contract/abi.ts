@@ -194,7 +194,13 @@ export default [
     "type": "function"
   },
   {
-    "inputs": [],
+    "inputs": [
+      {
+        "internalType": "string",
+        "name": "_name",
+        "type": "string"
+      }
+    ],
     "name": "createProject",
     "outputs": [],
     "stateMutability": "nonpayable",
@@ -349,6 +355,11 @@ export default [
         "type": "address"
       },
       {
+        "internalType": "string",
+        "name": "name",
+        "type": "string"
+      },
+      {
         "internalType": "bool",
         "name": "active",
         "type": "bool"
@@ -421,6 +432,11 @@ export default [
         "internalType": "address",
         "name": "owner",
         "type": "address"
+      },
+      {
+        "internalType": "string",
+        "name": "name",
+        "type": "string"
       },
       {
         "internalType": "contract IERC20",
