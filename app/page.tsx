@@ -10,21 +10,25 @@ import { WagmiCompoment } from "@/components/wallet";
 import { CreateContractButton } from "@/components/create-project";
 import { ProjectTable } from "@/components/project-list";
 import BaseTable from "@/components/table";
+import { WalletUsersScrollable } from "@/components/user";
 
 export default function Home() {
   return (
     <section className="flex flex-col items-center justify-center gap-4 py-8 md:py-10">
-      <div className="inline-block max-w-xl text-center justify-center">
-        <span className={title()}>Make&nbsp;</span>
-        <span className={title({ color: "violet" })}>beautiful&nbsp;</span>
-        <br />
-        <span className={title()}>
-          websites regardless of your design experience.
-        </span>
-        <div className={subtitle({ class: "mt-4" })}>
-          Beautiful, fast and modern React UI library.
-        </div>
-      </div>
+      <WalletUsersScrollable addresses={[
+        "0xb17431E497dd0289e076dAF827C036ea90e17cDb",
+        "0xC771cb2F591001eee1690CC8A82f0045A774A4BC",
+        "0xbEE7f7795d90DCf976cD2990cb5F79FAE9207419",
+        "0x00d936ef12a4Fde33Ab0FcF08F18d6A9BAbB6b97",
+        "0xb17431E497dd0289e076dAF827C036ea90e17cDb",
+        "0x773cd1Eed5E018d1E4903dda602A28203a97CC57",
+        "0xb17431E497dd0289e076dAF827C036ea90e17cDb",
+        "0xb17431E497dd0289e076dAF827C036ea90e17cDb",
+        "0xb17431E497dd0289e076dAF827C036ea90e17cDb",
+        "0xb17431E497dd0289e076dAF827C036ea90e17cDb",
+
+        
+      ]} />
 
       <div className="flex gap-3">
         <Link

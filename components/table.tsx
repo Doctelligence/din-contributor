@@ -20,6 +20,9 @@ import { Pagination } from "@nextui-org/pagination";
 import {Skeleton} from "@nextui-org/skeleton";
 import { useEnsAvatar, useEnsName } from "wagmi";
 import { mainnet } from 'wagmi/chains'
+import { Snippet } from "@nextui-org/snippet";
+import { Link } from "@nextui-org/link";
+import { WalletUser } from "./user";
 
 
 export type IconSvgProps = SVGProps<SVGSVGElement> & {
@@ -296,42 +299,6 @@ export const users = [
   // },
 ];
 
-type address = `0x${string}`;
-
-function WalletUser(props: { address: address }) {
-  const {data: name, ...a1} = useEnsName({
-    address: props.address,
-    chainId: mainnet.id,
-  });
-  const {data: avatar, ...args} = useEnsAvatar({
-    name: typeof name === 'string' ? name : undefined,
-    chainId: mainnet.id,
-  });
-  console.log('WALLET USER', name, a1, avatar, args);
-  // const {data: avatar} = useEnsAvatar({name: props.address});
-
-  return (
-    <User
-      // avatarProps={{radius: "full", size: "sm", src: "https://euc.li/doctelligence.eth"}}
-      avatarProps={{
-        radius: "full",
-        size: "sm",
-        src: typeof avatar === 'string' ? avatar : undefined,
-        isBordered: true,
-        fallback: <Skeleton className="flex rounded-full w-12 h-12" />
-      }}
-      classNames={{
-        description: "text-default-500",
-      }}
-      description={props.address}
-      // name={name ?? props.address}
-      name={name ?? <Skeleton className="flex rounded-full w-60 h-3" />}
-    >
-      {props.address}
-    </User>
-  );
-
-}
 
 export function capitalize(s: string) {
   return s ? s.charAt(0).toUpperCase() + s.slice(1).toLowerCase() : "";
@@ -525,15 +492,6 @@ export default function BaseTable() {
       case "owner":
         return (
           <WalletUser address={user.owner} />
-          //   avatarProps={{radius: "full", size: "sm", src: user.avatar}}
-          //   classNames={{
-          //     description: "text-default-500",
-          //   }}
-          //   description={user.email}
-          //   name={cellValue}
-          // >
-          //   {user.email}
-          // </WalletUser>
         );
       case "role":
         return (

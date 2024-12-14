@@ -13,12 +13,14 @@
 		"@nextui-org/chip": "^2.2.4",
 		"@nextui-org/code": "^2.2.3",
 		"@nextui-org/dropdown": "^2.3.7",
+		"@nextui-org/form": "^2.1.6",
 		"@nextui-org/input": "^2.4.3",
 		"@nextui-org/kbd": "^2.2.3",
 		"@nextui-org/link": "^2.2.3",
 		"@nextui-org/listbox": "^2.3.3",
 		"@nextui-org/navbar": "^2.2.3",
 		"@nextui-org/pagination": "^2.2.6",
+		"@nextui-org/scroll-shadow": "^2.3.3",
 		"@nextui-org/skeleton": "^2.2.3",
 		"@nextui-org/snippet": "^2.2.4",
 		"@nextui-org/switch": "^2.2.3",
@@ -37,6 +39,7 @@
 		"pino-pretty": "^13.0.0",
 		"react": "18.3.1",
 		"react-dom": "18.3.1",
+		"snippet": "^0.1.0",
 		"wagmi": "^2.13.5"
 	},
 	"devDependencies": {
