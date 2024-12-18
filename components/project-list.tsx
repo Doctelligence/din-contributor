@@ -19,21 +19,6 @@ import {
   TableCell
 } from "@nextui-org/table";
 
-interface Project {
-  active: boolean,
-  name: string,
-  owner: string,
-  rewardToken: string,
-  contributorRewardAmount: number,
-  validatorRewardAmount: number,
-  validationCommitmentDeadline: number,
-  validationRevealDeadline: number,
-  numContributors: number,
-  numValidators: number,
-  totalScore: number,
-  totalSuccessfulValidations: number,
-}
-
 export const ProjectRow = ({ index }: { index: number }) => {
   // const { data: project, ...args } = useReadContract({
   //   address: CONTRACT_ADDRESS,

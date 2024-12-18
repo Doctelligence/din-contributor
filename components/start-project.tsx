@@ -22,10 +22,7 @@ export const StartProjectForm = () => {
     functionName: "latestRoundData",
   });
 
-  const rate = data ? (Math.round(Number((data as bigint[])[1]) / 1e6) / 1e2) : undefined;
-  // console.log(rate);
-  // console.log((data as bigint[]))
-  // console.log(mainnetConfig, data && (Number((data as bigint[])[1]) / 1e8), args);
+  const rate = data ? (Math.round(Number(data[1]) / 1e6) / 1e2) : undefined;
 
   return (
     <Form
@@ -103,6 +100,9 @@ export const StartProjectForm = () => {
         </Button>
         <Button type="reset" variant="flat">
           Reset
+        </Button>
+        <Button type="reset" variant="flat" isDisabled className='align-right'>
+          {rate ? 'Cost $' + Math.round((validatorAmount + contributorAmount) * rate * 100) / 100 : ''}
         </Button>
       </div>
       {action && (

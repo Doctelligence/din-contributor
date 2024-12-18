@@ -27,13 +27,13 @@ export const ProjectCount = () => {
     functionName: 'projects',
   });
 
-  const createdProject = useReadContract({
-    address: CONTRACT_ADDRESS,
-    abi,
-    functionName: 'createProject',
-  });
+  // const createdProject = useReadContract({
+  //   address: CONTRACT_ADDRESS,
+  //   abi,
+  //   functionName: 'createProject',
+  // });
 
-  console.log('CALLING ADDRESSES', account.address, createProject.data, createdProject);
+  // console.log('CALLING ADDRESSES', account.address, createProject.data, createdProject);
 
   // const { data } = useWriteContract({
   //   config: {

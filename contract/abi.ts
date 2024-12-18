@@ -630,4 +630,4 @@ export default [
     "stateMutability": "view",
     "type": "function"
   }
-]
+] as const;
