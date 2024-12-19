@@ -4,11 +4,11 @@ import abi from '@/contract/abi';
 import { StartProjectArgs, toStartProject } from '@/components/project'
 
 export const useStartProject = () => {
-  const { writeContractAsync, writeContract, ...args } = useWriteContract();
+  const { writeContract, ...args } = useWriteContract();
 
   return {
     startProject: (value: StartProjectArgs) => {
-      return writeContractAsync({
+      return writeContract({
         address: MOCK_ERC20_ADDRESS,
         abi,
         args: toStartProject(value),

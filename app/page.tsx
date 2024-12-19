@@ -11,7 +11,7 @@ import { CreateContractButton } from "@/components/create-project";
 import { ProjectTable } from "@/components/project-list";
 import BaseTable from "@/components/table";
 import { WalletUsersScrollable } from "@/components/user";
-import { StartProjectForm } from "@/components/start-project";
+import { StartProjectForm, StartProjectPage } from "@/components/start-project";
 import { CreateTokenModal } from "@/components/create-token";
 import { Modal } from "@nextui-org/modal";
 
@@ -19,7 +19,7 @@ export default function Home() {
   return (
     <section className="flex flex-col items-center justify-center gap-4 py-8 md:py-10">
       <CreateTokenModal />
-      <StartProjectForm />
+      <StartProjectPage />
       <WalletUsersScrollable addresses={[
         "0xb17431E497dd0289e076dAF827C036ea90e17cDb",
         "0xC771cb2F591001eee1690CC8A82f0045A774A4BC",

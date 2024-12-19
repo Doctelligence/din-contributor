@@ -3,14 +3,14 @@ import { MOCK_ERC20_ADDRESS } from '@/contract/config';
 import erc from '@/contract/ercabi';
 
 export const useCreateRewardToken = () => {
-  const { writeContractAsync, writeContract, ...args } = useWriteContract();
+  const { writeContract, ...args } = useWriteContract();
 
   return {
-    mint: (value: number) => {
+    createRewardToken: (value: bigint) => {
       return writeContract({
         address: MOCK_ERC20_ADDRESS,
         abi: erc,
-        args: [BigInt(value * 1e18)],
+        args: [value],
         functionName: 'mint',
       })
     },

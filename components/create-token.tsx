@@ -14,14 +14,14 @@ import { Spinner } from "@nextui-org/spinner";
 import { useCreateRewardToken } from "@/hooks/createRewardToken";
 
 export function CreateTokenModal() {
-  const {isOpen, onOpen, onClose} = useDisclosure();
+  const { isOpen, onOpen, onClose } = useDisclosure();
   const [backdrop, setBackdrop] = React.useState("opaque");
-  const { mint, status, data } = useCreateRewardToken();
+  const { createRewardToken: mint, status, data } = useCreateRewardToken();
 
   const backdrops = ["blur"];
 
   const handleOpen = (backdrop: string) => {
-    mint(0.0001)
+    mint(BigInt(0.0001 * 1e18));
   };
 
   useEffect(() => {
@@ -53,17 +53,12 @@ export function CreateTokenModal() {
         ))}
       </div>
       <Modal backdrop={"blur"} isOpen={isOpen} hideCloseButton className="bg-opacity-0 border-opacity-0">
-        <ModalContent>
+        <ModalContent className="bg-opacity-0 border-opacity-0">
           {(onClose) => (
             <>
-              <ModalBody>
-                {/* <p>
-                  Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nullam pulvinar risus non
-                  risus hendrerit venenatis. Pellentesque sit amet hendrerit risus, sed porttitor
-                  quam.
-                </p> */}
-                <Spinner color="warning" label="Creating Token ..." />
-              </ModalBody>
+              {/* <ModalBody> */}
+                <Spinner color="warning" label="Creating Token ..." className="bg-opacity-0 border-opacity-0" />
+              {/* </ModalBody> */}
             </>
           )}
         </ModalContent>
