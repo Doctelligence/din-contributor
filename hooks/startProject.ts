@@ -1,7 +1,7 @@
 import { useWriteContract } from 'wagmi';
 import { MOCK_ERC20_ADDRESS } from '@/contract/config';
 import abi from '@/contract/abi';
-import { StartProjectArgs, toStartProject } from '@/components/project'
+import { StartProjectArgs, toStartProject } from '@/utils/project'
 
 export const useStartProject = () => {
   const { writeContract, ...args } = useWriteContract();

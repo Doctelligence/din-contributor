@@ -21,6 +21,7 @@ import { Spinner } from "@nextui-org/spinner";
 import { useCreateRewardToken } from "@/hooks/createRewardToken";
 import { useStartProject } from '@/hooks/startProject';
 import { useStartProjectWithToken } from '@/hooks/startProjectWithToken';
+import { useGetEthUsdRate } from '@/hooks/getEthUsdRate';
 
 interface StartProjectForm {
   validationReward: number,
@@ -54,14 +55,7 @@ export const StartProjectForm = (props: { onSubmit: (props: StartProjectForm) =>
   const [contributorAmount, setContributorAmount] = useState(0.001);
   const [validatorAmount, setValidatorAmount] = useState(0.001);
   const [contributorDeadline, setContributorDeadline] = useState(today(getLocalTimeZone()).add({ days: 7 }));
-  const { data, ...args } = useReadContract({
-    abi: ethabi,
-    address: CONVERSION_ADDRESS_ETH_USD,
-    config: mainnetConfig,
-    functionName: "latestRoundData",
-  });
-
-  const rate = data ? (Math.round(Number(data[1]) / 1e6) / 1e2) : undefined;
+  const rate = useGetEthUsdRate();
 
 
   const { isOpen, onOpen, onClose } = useDisclosure();

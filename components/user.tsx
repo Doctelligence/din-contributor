@@ -48,10 +48,12 @@ export function WalletUser(props: { address: address }) {
   const {data: name, isPending: isNamePending, isSuccess: isNameSuccess} = useEnsName({
     address: props.address,
     chainId: mainnet.id,
+    // scopeKey: 'walletUser',
   });
   const {data: avatar, isPending: isAvatarPending} = useEnsAvatar({
     name: typeof name === 'string' ? name : undefined,
     chainId: mainnet.id,
+    // scopeKey: 'walletUser',
   });
 
   return (

@@ -1,16 +1,7 @@
 import { useEffect, useState, useMemo } from 'react';
 import { useStartProject } from './startProject';
 import { useCreateRewardToken } from './createRewardToken';
-import { StartProjectArgs } from '@/components/project';
-
-// BigInt(value * 1e18)
-
-interface StartProjectForm {
-  validationReward: number,
-  contributionReward: number,
-  contributorDeadline: string,
-  validatorDeadline: string,
-}
+import { StartProjectArgs } from '@/utils/project';
 
 export const useStartProjectWithToken = () => {
   const { startProject, status: startProjectStatus, reset: resetProject } = useStartProject();

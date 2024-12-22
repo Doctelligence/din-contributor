@@ -1,11 +1,14 @@
 import abi from '@/contract/abi';
 import { useWriteContract } from 'wagmi';
-import { ContractFunctionArgs, ExtractAbiItem, AbiItemName, AbiItemArgs, Abi } from 'viem';
+import { ReadContractReturnType, ContractFunctionArgs, ExtractAbiItem, AbiItemName, AbiItemArgs, Abi, GetAbiItemReturnType, ParseAbiParameters, AbiFunction, AbiParameter } from 'viem';
 
 type Project2 = ContractFunctionArgs<typeof abi, 'nonpayable', 'startProject'>;
 type Name = ExtractAbiItem<typeof abi, 'startProject'>['inputs'];
 type Name2 = AbiItemName<typeof abi>;
 type Args = AbiItemArgs<typeof abi, 'startProject'>;
+type ProjectInfoArgs = AbiItemArgs<typeof abi, 'projectInfo'>;
+type ProjectReturnArgs = ReadContractReturnType<typeof abi, 'projectInfo'>;
+type ProjectArgs = GetAbiItemReturnType<typeof abi, 'projects'>['outputs'];
 
 export interface StartProjectArgs {
   projectId: Args[0],
@@ -82,4 +85,44 @@ export function canStartProject(project: Project) {
     && project.numContributors > 0;
 }
 
+interface ProjectInfoReturnType {
+  owner: ProjectReturnArgs[0],
+  name: ProjectReturnArgs[1],
+  active: ProjectReturnArgs[2],
+  rewardToken: ProjectReturnArgs[3],
+  contributorRewardAmount: ProjectReturnArgs[4],
+  validatorRewardAmount: ProjectReturnArgs[5],
+  validationCommitmentDeadline: ProjectReturnArgs[6],
+  validationRevealDeadline: ProjectReturnArgs[7],
+  numContributors: ProjectReturnArgs[8],
+  numValidators: ProjectReturnArgs[9],
+  totalScore: ProjectReturnArgs[10],
+  totalSuccessfulValidations: ProjectReturnArgs[11],
+}
 
+export function projectInfo(rawResult: ProjectReturnArgs) : ProjectInfoReturnType {
+  const keys = ["owner", "name", "active", "rewardToken", "contributorRewardAmount", "validatorRewardAmount", "validationCommitmentDeadline", "validationRevealDeadline", "numContributors", "numValidators", "totalScore", "totalSuccessfulValidations"];
+
+  const result : any = {}
+  for (let i = 0; i < keys.length; i++) {
+      result[keys[i]] = rawResult[i];
+  }
+
+  return result;
+}
+
+export function projectInfoToSensibleTypes(project: ProjectInfoReturnType, projectId: number) {
+  return {
+    ...project,
+    active: Boolean(project.active),
+    contributorRewardAmount: Number(project.contributorRewardAmount),
+    validatorRewardAmount: Number(project.validatorRewardAmount),
+    validationCommitmentDeadline: new Date(Number(project.validationCommitmentDeadline)),
+    validationRevealDeadline: new Date(Number(project.validationRevealDeadline)),
+    numContributors: Number(project.numContributors),
+    numValidators: Number(project.numValidators),
+    totalScore: Number(project.totalScore),
+    totalSuccessfulValidations: Number(project.totalSuccessfulValidations),
+    projectId,
+  };
+}

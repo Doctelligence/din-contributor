@@ -6,6 +6,7 @@ import { CONTRACT_ADDRESS } from "@/contract/config";
 import abi from "@/contract/abi";
 import { useReadContract, useWriteContract } from "wagmi";
 import { Code } from "@nextui-org/code";
+import { useGetProjectCount } from "@/hooks/getProjectData";
 
 export function WagmiCompoment() {
   const { data: maxScore, error, ...args } = useReadContract({
@@ -14,11 +15,7 @@ export function WagmiCompoment() {
     functionName: 'MAX_SCORE',
   });
 
-  const { data: projectCount } = useReadContract({
-    address: CONTRACT_ADDRESS,
-    abi,
-    functionName: 'projectCount',
-  });
+  const projectCount = useGetProjectCount();
 
   if (error) return <code>{error.message}</code>
 

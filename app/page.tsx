@@ -9,16 +9,18 @@ import { GithubIcon } from "@/components/icons";
 import { WagmiCompoment } from "@/components/wallet";
 import { CreateContractButton } from "@/components/create-project";
 import { ProjectTable } from "@/components/project-list";
-import BaseTable from "@/components/table";
+import BaseTable, { ProjectTableWithStartModal } from "@/components/table";
 import { WalletUsersScrollable } from "@/components/user";
 import { StartProjectForm, StartProjectPage } from "@/components/start-project";
 import { CreateTokenModal } from "@/components/create-token";
-import { Modal } from "@nextui-org/modal";
+import { Modal, useDisclosure } from "@nextui-org/modal";
 
 export default function Home() {
+
   return (
     <section className="flex flex-col items-center justify-center gap-4 py-8 md:py-10">
-      <CreateTokenModal />
+      {/* <StartProjectPage /> */}
+      {/* <CreateTokenModal />
       <StartProjectPage />
       <WalletUsersScrollable addresses={[
         "0xb17431E497dd0289e076dAF827C036ea90e17cDb",
@@ -67,10 +69,10 @@ export default function Home() {
             <WagmiCompoment />
           </span>
         </Snippet>
-      </div>
+      </div> */}
 
       {/* <ProjectTable /> */}
-      <BaseTable />
+      <ProjectTableWithStartModal />
     </section>
   );
 }
