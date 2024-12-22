@@ -20,10 +20,12 @@ import {
   TableRow,
 } from "@nextui-org/table";
 import { User } from "@nextui-org/user";
-import React from "react";
-import { WalletUser } from "./user";
-import { useDisclosure } from "@nextui-org/modal";
-import { CreateContractModal } from "./create-project";
+import React, { use } from "react";
+import { WalletUser, WalletUsersScrollable } from "./user";
+import { Modal, ModalContent, useDisclosure } from "@nextui-org/modal";
+import { Tooltip } from "@nextui-org/tooltip";
+import { CreateContractButton, CreateContractModal } from "./create-project";
+import { StartProjectForm, StartProjectPage } from "./start-project";
 
 type User = ReturnType<typeof projectInfoToSensibleTypes>;
 
@@ -45,6 +47,7 @@ export const columns = [
   {name: "CONTRIBUTORS", uid: "numContributors", sortable: true},
   {name: "VALIDATORS", uid: "numValidators", sortable: true},
   {name: "STATUS", uid: "active", sortable: true},
+  {name: "ACTIONS", uid: "actions"},
   // {name: "ID", uid: "id", sortable: true},
   // // {name: "NAME", uid: "name", sortable: true},
   // {name: "AGE", uid: "age", sortable: true},
@@ -77,12 +80,13 @@ const INITIAL_VISIBLE_COLUMNS = [
   "name",
   "numContributors",
   "numValidators",
-  "active"
+  "active",
+  "actions",
 ];
 
 // type User = (typeof projects)[0];
 
-export default function BaseTable(props: { onCreateNew: () => void }) {
+export default function BaseTable(props: { onCreateNew: () => void; onStartProject: (projectId: number) => void }) {
   const projects = useGetProjectData() || [];
   const [filterValue, setFilterValue] = React.useState("");
   const [selectedKeys, setSelectedKeys] = React.useState<Selection>(new Set([]));
@@ -147,9 +151,26 @@ export default function BaseTable(props: { onCreateNew: () => void }) {
     const cellValue = user[columnKey as keyof User];
 
     switch (columnKey) {
+      case "numValidators":
+      case "numContributors":
+      case "totalScore":
+        return <Tooltip delay={1} isDisabled={cellValue === 0} content={
+          <WalletUsersScrollable addresses={[
+            "0xb17431E497dd0289e076dAF827C036ea90e17cDb",
+            "0xC771cb2F591001eee1690CC8A82f0045A774A4BC",
+            "0xbEE7f7795d90DCf976cD2990cb5F79FAE9207419",
+            "0x00d936ef12a4Fde33Ab0FcF08F18d6A9BAbB6b97",
+            "0xb17431E497dd0289e076dAF827C036ea90e17cDb",
+            "0x773cd1Eed5E018d1E4903dda602A28203a97CC57",
+            "0xb17431E497dd0289e076dAF827C036ea90e17cDb",
+            "0xb17431E497dd0289e076dAF827C036ea90e17cDb",
+            "0xb17431E497dd0289e076dAF827C036ea90e17cDb",
+            "0xb17431E497dd0289e076dAF827C036ea90e17cDb",
+          ]} />
+        } className="text-center">{cellValue as number}</Tooltip>;
       case "owner":
         return (
-          <WalletUser key={user.owner} address={user.owner} />
+          <WalletUser key={'project-display' + '-' + user.projectId + '-' + user.owner} address={user.owner} />
         );
       // case "role":
       //   return (
@@ -180,15 +201,17 @@ export default function BaseTable(props: { onCreateNew: () => void }) {
                 </Button>
               </DropdownTrigger>
               <DropdownMenu>
-                <DropdownItem key="view">View</DropdownItem>
-                <DropdownItem key="edit">Edit</DropdownItem>
-                <DropdownItem key="delete">Delete</DropdownItem>
+                <DropdownItem onPress={() => props.onStartProject(user.projectId)} key="start">Start Project</DropdownItem>
+                <DropdownItem key="view">Join as contributor</DropdownItem>
+                <DropdownItem key="edit">Join as validator</DropdownItem>
+                {/* <DropdownItem key="delete">Delete</DropdownItem> */}
               </DropdownMenu>
             </Dropdown>
           </div>
         );
       default:
-        return cellValue;
+        // TODO: Remve this misleading typecasting
+        return cellValue as string | number | boolean;
     }
   }, []);
 
@@ -418,11 +441,23 @@ export default function BaseTable(props: { onCreateNew: () => void }) {
 
 export function ProjectTableWithStartModal() {
   const { isOpen, onOpen, onClose } = useDisclosure();
+  const startFormModal = useDisclosure();
+  const [projectId, setProjectId] = React.useState<number>();
 
   return (
     <>
       <CreateContractModal isOpen={isOpen} onClose={onClose} />
-      <BaseTable onCreateNew={onOpen} />
+      
+      <BaseTable onCreateNew={onOpen} onStartProject={_projectId => {
+        setProjectId(_projectId);
+        startFormModal.onOpen();
+      }} />
+
+      <Modal hideCloseButton backdrop={"blur"} isOpen={startFormModal.isOpen} onClose={startFormModal.onClose}>
+        <ModalContent >
+          {projectId && <StartProjectForm onClose={startFormModal.onClose} projectId={projectId} />}
+        </ModalContent>
+      </Modal>
     </>
   );
 }

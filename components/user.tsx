@@ -7,6 +7,8 @@ import { User } from "@nextui-org/user";
 import { useEnsAvatar, useEnsName } from "wagmi";
 import { mainnet } from 'wagmi/chains';
 import { ScrollShadow } from "@nextui-org/scroll-shadow";
+import { createStorage } from 'wagmi';
+import { config } from '../contract/config';
 
 type address = `0x${string}`;
 
@@ -44,17 +46,37 @@ const CheckIcon = ({size, height, width, ...props}: { size?: number, height?: nu
   );
 };
 
+// const storage = createStorage({ storage: localStorage })
+
 export function WalletUser(props: { address: address }) {
   const {data: name, isPending: isNamePending, isSuccess: isNameSuccess} = useEnsName({
     address: props.address,
     chainId: mainnet.id,
-    // scopeKey: 'walletUser',
+    config: {
+      ...config,
+      // storage,
+    },
+    query: {
+      staleTime: Infinity,
+      retry: 0,
+    },
+    scopeKey  : 'wallet-user',
   });
   const {data: avatar, isPending: isAvatarPending} = useEnsAvatar({
     name: typeof name === 'string' ? name : undefined,
     chainId: mainnet.id,
-    // scopeKey: 'walletUser',
+    config: {
+      ...config,
+      // storage,
+    },
+    query: {
+      staleTime: Infinity,
+      retry: 0,
+    },
+    scopeKey  : 'wallet-user',
   });
+
+  console.log(name, avatar, isNamePending, isAvatarPending);
 
   return (
     <User

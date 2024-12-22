@@ -30,7 +30,12 @@ interface StartProjectForm {
   validatorDeadline: string,
 }
 
-export const StartProjectPage = () => {
+export interface ProjectFormProps {
+  projectId: number;
+  onClose: () => void;
+}
+
+export const StartProjectPage = (props: ProjectFormProps) => {
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const onSubmit = async (data: StartProjectForm) => {
@@ -42,15 +47,13 @@ export const StartProjectPage = () => {
   return (
     <div className="flex flex-col gap-4">
       <h1 className="text-2xl font-bold">Start a Project</h1>
-      <StartProjectForm onSubmit={() => {
-
-      }} />
+      <StartProjectForm {...props} />
       {isSubmitting ? <p>Submitting...</p> : null}
     </div>
   );
 };
 
-export const StartProjectForm = (props: { onSubmit: (props: StartProjectForm) => void }) => {
+export const StartProjectForm = (props: ProjectFormProps) => {
   const [action, setAction] = useState<string>();
   const [contributorAmount, setContributorAmount] = useState(0.001);
   const [validatorAmount, setValidatorAmount] = useState(0.001);
@@ -80,9 +83,9 @@ export const StartProjectForm = (props: { onSubmit: (props: StartProjectForm) =>
   // }, [isOpen, mintStatus]);
 
   return (
-    <>
+    <div>
       <Form
-        className="w-full max-w-xs flex flex-col gap-4"
+        className="w-full max-w-xs flex flex-col gap-4 p-4 align-center"
         validationBehavior="aria"
         onReset={() => setAction("reset")}
         onSubmit={(e) => {
@@ -101,8 +104,9 @@ export const StartProjectForm = (props: { onSubmit: (props: StartProjectForm) =>
               validationRewardAmount: BigInt(validatorAmount * 1e18),
               validationCommitmentDeadline: BigInt(validatorDeadline.toDate('utc').valueOf()),
               validationRevealDeadline: BigInt(validatorDeadline.toDate('utc').valueOf()),
-              projectId: BigInt(0),
+              projectId: BigInt(props.projectId),
             });
+            props.onClose();
             // props.onSubmit(data as unknown as StartProjectForm);
           }
         }}
@@ -179,6 +183,6 @@ export const StartProjectForm = (props: { onSubmit: (props: StartProjectForm) =>
           </ModalBody>
         </ModalContent>
       </Modal>
-    </>
+    </div>
   );
 }

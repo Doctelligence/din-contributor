@@ -1568,6 +1568,25 @@
     "@react-types/overlays" "3.8.11"
     "@react-types/tooltip" "3.4.13"
 
+"@nextui-org/tooltip@^2.2.5":
+  version "2.2.5"
+  resolved "https://registry.yarnpkg.com/@nextui-org/tooltip/-/tooltip-2.2.5.tgz#9a999eeff4be3a21e2b96367d7cc47579969fc23"
+  integrity sha512-6P28S2p18uNpLHIi7trrHImtrkaxpWBimtqf3u+NZc33dYG44iBV4BfuOvp1TCFwCW+Dv5k1XLK+AMr54o1FYw==
+  dependencies:
+    "@nextui-org/aria-utils" "2.2.5"
+    "@nextui-org/dom-animation" "2.1.1"
+    "@nextui-org/framer-utils" "2.1.4"
+    "@nextui-org/react-utils" "2.1.1"
+    "@nextui-org/shared-utils" "2.1.1"
+    "@nextui-org/use-safe-layout-effect" "2.1.1"
+    "@react-aria/interactions" "3.22.5"
+    "@react-aria/overlays" "3.24.0"
+    "@react-aria/tooltip" "3.7.10"
+    "@react-aria/utils" "3.26.0"
+    "@react-stately/tooltip" "3.5.0"
+    "@react-types/overlays" "3.8.11"
+    "@react-types/tooltip" "3.4.13"
+
 "@nextui-org/use-aria-button@2.2.3":
   version "2.2.3"
   resolved "https://registry.npmjs.org/@nextui-org/use-aria-button/-/use-aria-button-2.2.3.tgz"

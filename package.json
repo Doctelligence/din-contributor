@@ -50,6 +50,7 @@
 	},
 	"devDependencies": {
 		"@next/eslint-plugin-next": "15.0.4",
+		"@nextui-org/tooltip": "^2.2.5",
 		"@react-types/shared": "3.25.0",
 		"@typechain/ethers-v5": "^11.1.2",
 		"@types/node": "20.5.7",
