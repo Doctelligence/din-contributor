@@ -34,7 +34,8 @@ import { Button } from "@nextui-org/button";
 import { useAddValidatorsOrContributors } from "@/hooks/addContributor";
 import { check } from "prettier";
 
-export function App({ wallets, title, projectId, type }: { wallets: `0x${string}`[]; title: string; projectId: number, type: "Contributors" | "Validators" }) {
+ 
+function ContributorsAndValidatorsManager({ wallets, title, projectId, type }: { wallets: `0x${string}`[]; title: string; projectId: number, type: "Contributors" | "Validators" }) {
   const { add, isPending, isSuccess, ...args } = useAddValidatorsOrContributors();
   const [keys, setKeys] = useState<Set<number | string> | "all">(new Set<number | string>());
   const reset = useContext(SQLContext)[1];
@@ -199,7 +200,7 @@ function getAll() {
   return all;
 }
 
-export function PendingContributions() {
+function PendingContributions() {
   const all = getAll();
   // const projects = useGetProjectData() || [];
   // const projectIds = projects.map(p => p.projectId).join(',');
@@ -221,7 +222,7 @@ export function PendingContributions() {
   return (
     <div className="flex flex-col gap-4">
       {page <= all.length && <>
-      <App wallets={all[page - 1].party} title={all[page - 1].name} projectId={all[page - 1].project} type={all[page - 1].type as "Contributors" | "Validators"} />
+      <ContributorsAndValidatorsManager wallets={all[page - 1].party} title={all[page - 1].name} projectId={all[page - 1].project} type={all[page - 1].type as "Contributors" | "Validators"} />
       <Pagination onChange={page => {setPage(page)}} className="m-auto" loop showControls color="success" page={page} total={all.length} />
       </>}
       
