@@ -27,7 +27,7 @@ export const ProjectRow = ({ index }: { index: number }) => {
   //   args: [index],
   // }) as { data: Project };
 
-  console.log('PROJECT ROW', index);
+  // console.log('PROJECT ROW', index);
 
   const project = {
     active: true,
@@ -61,7 +61,7 @@ export const ProjectTable = () => {
     functionName: 'projectCount',
   });
 
-  console.log('PROJECT COUNT', projectCount, args);
+  // console.log('PROJECT COUNT', projectCount, args);
 
   const project = {
     active: true,

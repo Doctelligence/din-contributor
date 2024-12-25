@@ -28,7 +28,7 @@ export function CreateTokenModal() {
     if (isOpen && status !== "pending") {
       onClose();
       if (status === 'success') {
-        console.log({status, data});
+        // console.log({status, data});
       }
     }
     if (!isOpen && status === "pending") {

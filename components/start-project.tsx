@@ -22,6 +22,7 @@ import { useCreateRewardToken } from "@/hooks/createRewardToken";
 import { useStartProject } from '@/hooks/startProject';
 import { useStartProjectWithToken } from '@/hooks/startProjectWithToken';
 import { useGetEthUsdRate } from '@/hooks/getEthUsdRate';
+import { useExchange } from '@/app/providers';
 
 interface StartProjectForm {
   validationReward: number,
@@ -40,7 +41,7 @@ export const StartProjectPage = (props: ProjectFormProps) => {
 
   const onSubmit = async (data: StartProjectForm) => {
     setIsSubmitting(true);
-    console.log(data);
+    // console.log(data);
     setIsSubmitting(false);
   }
 
@@ -58,7 +59,12 @@ export const StartProjectForm = (props: ProjectFormProps) => {
   const [contributorAmount, setContributorAmount] = useState(0.001);
   const [validatorAmount, setValidatorAmount] = useState(0.001);
   const [contributorDeadline, setContributorDeadline] = useState(today(getLocalTimeZone()).add({ days: 7 }));
-  const rate = useGetEthUsdRate();
+  const rate = useExchange();
+  // const rate = useGetEthUsdRate();
+  // const rate = undefined;
+  // console.log({ rate });
+
+  // const rate = 100;
 
 
   const { isOpen, onOpen, onClose } = useDisclosure();
@@ -85,7 +91,7 @@ export const StartProjectForm = (props: ProjectFormProps) => {
   return (
     <div>
       <Form
-        className="w-full max-w-xs flex flex-col gap-4 p-4 align-center"
+        className="flex flex-col gap-4 p-4 align-center"
         validationBehavior="aria"
         onReset={() => setAction("reset")}
         onSubmit={(e) => {
@@ -93,7 +99,7 @@ export const StartProjectForm = (props: ProjectFormProps) => {
 
           let data = Object.fromEntries(new FormData(e.currentTarget));
 
-          console.log(e.currentTarget.getAttribute('contributorDeadline'));
+          // console.log(e.currentTarget.getAttribute('contributorDeadline'));
 
           const contributorDeadline = parseDate(data.contributorDeadline as string);
           const validatorDeadline = parseDate(data.validatorDeadline as string);
@@ -159,17 +165,17 @@ export const StartProjectForm = (props: ProjectFormProps) => {
           minValue={contributorDeadline}
         />
 
-        <div className="flex gap-2">
-          <Button color="primary" type="submit">
-            Submit
-          </Button>
+        <span style={{ width: '100%', display: 'flex', justifyContent: 'space-between' }}>
           <Button type="reset" variant="flat">
             Reset
           </Button>
-          <Button type="reset" variant="flat" isDisabled className='align-right'>
+          {rate && <Button type="reset" variant="flat" isDisabled style={{ float: 'right' }}>
             {rate ? 'Cost $' + Math.round((validatorAmount + contributorAmount) * rate * 100) / 100 : ''}
+          </Button>}
+          <Button color="primary" type="submit">
+            Submit
           </Button>
-        </div>
+        </span>
       </Form>
 
       <Modal backdrop={"blur"} isOpen={status === 'pendingProject' || status === 'pendingToken'} hideCloseButton className="bg-opacity-0 border-opacity-0">

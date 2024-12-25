@@ -20,12 +20,21 @@ import {
   TableRow,
 } from "@nextui-org/table";
 import { User } from "@nextui-org/user";
-import React, { use } from "react";
-import { WalletUser, WalletUsersScrollable } from "./user";
+import React, { use, useCallback, useContext, useEffect } from "react";
+import { WalletUser, WalletUsersScrollable } from "../user";
 import { Modal, ModalContent, useDisclosure } from "@nextui-org/modal";
 import { Tooltip } from "@nextui-org/tooltip";
-import { CreateContractButton, CreateContractModal } from "./create-project";
-import { StartProjectForm, StartProjectPage } from "./start-project";
+import { CreateContractButton, CreateContractModal } from "../create-project";
+import { StartProjectForm, StartProjectPage } from "../start-project";
+import { OwnerButton } from "./ownerButton";
+import { useAccount, useReadContracts } from "wagmi";
+import { SQLContext } from "@/app/providers";
+import   { neon } from "@neondatabase/serverless"
+import { appendContributors, appendValidators, POSTGRES_URL, TABLE_NAME,  } from "@/app/postgres";
+import { TABLE_VERSIONS } from "@/config/site";
+import { ac } from "@upstash/redis/zmscore-Dc6Llqgr";
+import abi from "@/contract/abi";
+import { CONTRACT_ADDRESS } from "@/contract/config";
 
 type User = ReturnType<typeof projectInfoToSensibleTypes>;
 
@@ -86,8 +95,88 @@ const INITIAL_VISIBLE_COLUMNS = [
 
 // type User = (typeof projects)[0];
 
+// export function useGetProjectDataByOwner(props: { owner: string }) {
+//   const projects = useGetProjectData() || [];
+
+//   return projects.filter((project) => project.owner === props.owner);
+
+// }
+
+export function Scrollable(props: { projectId: number; num: number; fn: 'getContributor' | 'getValidator' }) {
+  const res = useReadContracts({
+    contracts: new Array(props.num).fill(undefined).map((_, i) => ({
+      address: CONTRACT_ADDRESS as `0x${string}`,
+      abi,
+      functionName: props.fn as 'getContributor' | 'getValidator',
+      args: [BigInt(props.projectId), BigInt(i)],
+    })),
+  });
+
+  return (
+    <WalletUsersScrollable addresses={res.data?.map(res => res.result).filter(res => typeof res === 'string') || []} />
+  )
+}
+
 export default function BaseTable(props: { onCreateNew: () => void; onStartProject: (projectId: number) => void }) {
   const projects = useGetProjectData() || [];
+  const projectIds = projects.map(p => p.projectId).join(',');
+  const sql = useContext(SQLContext)[0];
+
+  console.log('the sql context is', sql)
+
+  useEffect(() => {
+    console.log('projects as ids', projects.map(p => p.projectId), sql);
+
+    const ids = projects.map(p => p.projectId);
+
+    const idOwnerMap = projects.reduce((acc, project) => {
+      acc[project.projectId] = project.owner;
+      return acc;
+    }
+    , {} as Record<number, string>);
+
+    const idNameMap = projects.reduce((acc, project) => {
+      acc[project.projectId] = project.name;
+      return acc;
+    }
+    , {} as Record<number, string>);
+
+    if (sql) {
+      const sqlIds = sql.map((p: Record<string, any>) => p.project);
+      const missingIds = ids.filter(id => !sqlIds.includes(id));
+
+      console.log(sqlIds, missingIds);
+
+      if (missingIds.length) {
+        const db = neon(POSTGRES_URL);
+        console.log('performing insertions', missingIds)
+        db.transaction(missingIds.map(id => db(`INSERT INTO ${TABLE_NAME} (project, owner, name, contributors, validators) VALUES ($1, $2, $3, $4, $5)`, [id, idOwnerMap[id], idNameMap[id], "", ""])))
+          .then((...data) => console.log('insertions complete', data))
+          .catch((e) => console.error('insertions failed', e));
+        
+        // missingIds.map(async (id) => {
+        //   sql(`INSERT INTO projects (project, owner, contributors, validators) VALUES ($1, $2, $3, $4)`, [id, "0x1", "0x2,0x3", "0x4"]);
+        // });
+      }
+
+      // console.log('missing ids', missingIds);
+
+      // missingIds.forEach(async (id) => {
+      //   await sql(`INSERT INTO ${TABLE_NAME} (project, owner, contributors, validators) VALUES ($1, $2, $3, $4)`, [id, "0x1", "0x2,0x3", "0x4"]);
+      // });
+    }
+
+    // const sqlIds = (sql || []).map((p: Record<string, any>) => p.project);
+
+
+
+
+    // await sql(`INSERT INTO ${TABLE_NAME} (project, owner, contributors, validators) VALUES ($1, $2, $3, $4)`, [1, "0x1", "0x2,0x3", "0x4"]);
+
+    // create a row for each project id that is not in the database
+
+  }, [projects.map(p => p.projectId).join(','), sql]);
+
   const [filterValue, setFilterValue] = React.useState("");
   const [selectedKeys, setSelectedKeys] = React.useState<Selection>(new Set([]));
   const [visibleColumns, setVisibleColumns] = React.useState<Selection>(
@@ -95,15 +184,14 @@ export default function BaseTable(props: { onCreateNew: () => void; onStartProje
   );
   const [statusFilter, setStatusFilter] = React.useState<Selection>("all");
   const [ownerFilter, setOwnerFilter] = React.useState(false);
-  console.log(ownerFilter)
+  // console.log(ownerFilter)
   const [rowsPerPage, setRowsPerPage] = React.useState(5);
   const [sortDescriptor, setSortDescriptor] = React.useState<SortDescriptor>({
     column: "age",
     direction: "ascending",
   });
   const [page, setPage] = React.useState(1);
-
-  const pages = Math.ceil(projects.length / rowsPerPage);
+  const account = useAccount();
 
   const hasSearchFilter = Boolean(filterValue);
 
@@ -121,14 +209,31 @@ export default function BaseTable(props: { onCreateNew: () => void; onStartProje
         user.name.toLowerCase().includes(filterValue.toLowerCase()),
       );
     }
+
+    if (ownerFilter) {
+      filteredUsers = filteredUsers.filter((user) => user.owner === account.address);
+    }
     // if (statusFilter !== "all" && Array.from(statusFilter).length !== statusOptions.length) {
     //   filteredUsers = filteredUsers.filter((user) =>
     //     Array.from(statusFilter).includes(user.status),
     //   );
     // }
 
-    return filteredUsers;
-  }, [projects, filterValue, statusFilter]);
+    return filteredUsers.map((user) => ({
+      ...user,
+      isOwner: user.owner === account.address,
+      currentAddress: account.address,
+    }));
+  }, [projects, filterValue, statusFilter, ownerFilter, account.address]);
+
+
+  const pages = Math.max(Math.ceil(filteredItems.length / rowsPerPage), 1);
+
+  useEffect(() => {
+    if (page > pages && page !== 1) {
+      setPage(1);
+    }
+  }, [pages]);
 
   const items = React.useMemo(() => {
     const start = (page - 1) * rowsPerPage;
@@ -145,28 +250,17 @@ export default function BaseTable(props: { onCreateNew: () => void; onStartProje
 
       return sortDescriptor.direction === "descending" ? -cmp : cmp;
     });
-  }, [sortDescriptor, items]);
+  }, [sortDescriptor, items, account.address]);
 
-  const renderCell = React.useCallback((user: User, columnKey: React.Key) => {
+  const renderCell = useCallback((user: User & { isOwner: boolean; currentAddress: string }, columnKey: React.Key) => {
     const cellValue = user[columnKey as keyof User];
 
     switch (columnKey) {
       case "numValidators":
       case "numContributors":
-      case "totalScore":
+      // case "totalScore":
         return <Tooltip delay={1} isDisabled={cellValue === 0} content={
-          <WalletUsersScrollable addresses={[
-            "0xb17431E497dd0289e076dAF827C036ea90e17cDb",
-            "0xC771cb2F591001eee1690CC8A82f0045A774A4BC",
-            "0xbEE7f7795d90DCf976cD2990cb5F79FAE9207419",
-            "0x00d936ef12a4Fde33Ab0FcF08F18d6A9BAbB6b97",
-            "0xb17431E497dd0289e076dAF827C036ea90e17cDb",
-            "0x773cd1Eed5E018d1E4903dda602A28203a97CC57",
-            "0xb17431E497dd0289e076dAF827C036ea90e17cDb",
-            "0xb17431E497dd0289e076dAF827C036ea90e17cDb",
-            "0xb17431E497dd0289e076dAF827C036ea90e17cDb",
-            "0xb17431E497dd0289e076dAF827C036ea90e17cDb",
-          ]} />
+          <Scrollable projectId={user.projectId} num={cellValue as number} fn={columnKey === 'numContributors' ? 'getContributor' : 'getValidator'} />
         } className="text-center">{cellValue as number}</Tooltip>;
       case "owner":
         return (
@@ -201,9 +295,26 @@ export default function BaseTable(props: { onCreateNew: () => void; onStartProje
                 </Button>
               </DropdownTrigger>
               <DropdownMenu>
-                <DropdownItem onPress={() => props.onStartProject(user.projectId)} key="start">Start Project</DropdownItem>
-                <DropdownItem key="view">Join as contributor</DropdownItem>
-                <DropdownItem key="edit">Join as validator</DropdownItem>
+                {/* <DropdownItem key={"addr"}>{user.currentAddress}</DropdownItem> */}
+                {user.isOwner ? <DropdownItem onPress={() => props.onStartProject(user.projectId)} key="start">Start Project</DropdownItem> : <></>}
+                {!user.isOwner ? <DropdownItem key="view" onPress={() => {
+                  // const db = neon(POSTGRES_URL);
+
+                  if (user.currentAddress) {
+                    appendContributors(user.projectId, user.currentAddress);
+                    alert('Contributor request sent');
+                  }
+
+                }}>Join as contributor</DropdownItem> : <></>}
+                {!user.isOwner ? <DropdownItem key="edit" onPress={() => {
+
+                if (user.currentAddress) {
+                  appendValidators(user.projectId, user.currentAddress);
+                  alert('Contributor request sent');
+                }
+
+                  alert('Validator request sent');
+                }}>Join as validator</DropdownItem> : <></>}
                 {/* <DropdownItem key="delete">Delete</DropdownItem> */}
               </DropdownMenu>
             </Dropdown>
@@ -214,6 +325,8 @@ export default function BaseTable(props: { onCreateNew: () => void; onStartProje
         return cellValue as string | number | boolean;
     }
   }, []);
+  
+  console.log('address is', account.address);
 
   const onRowsPerPageChange = React.useCallback((e: React.ChangeEvent<HTMLSelectElement>) => {
     setRowsPerPage(Number(e.target.value));
@@ -228,6 +341,15 @@ export default function BaseTable(props: { onCreateNew: () => void; onStartProje
       setFilterValue("");
     }
   }, []);
+
+  // const onOwnerFilterChange = React.useCallback((value?: boolean) => {
+  //   if (value) {
+  //     setOwnerFilter(value);
+  //     setPage(1);
+  //   } else {
+  //     setOwnerFilter(value);
+  //   }
+  // });
 
 
 
@@ -250,7 +372,8 @@ export default function BaseTable(props: { onCreateNew: () => void; onStartProje
             onValueChange={onSearchChange}
           />
           <div className="flex gap-3">
-            <Button
+            <OwnerButton isChecked={ownerFilter} onChange={setOwnerFilter} />
+            {/* <Button
                   onPress={() => {
                     console.log('ownerFilter', ownerFilter)
                     setOwnerFilter(!ownerFilter)
@@ -267,7 +390,7 @@ export default function BaseTable(props: { onCreateNew: () => void; onStartProje
                   variant="flat"
                 >
                   Owner
-              </Button>
+              </Button> */}
             <Dropdown>
               <DropdownTrigger className="hidden sm:flex">
                 <Button
@@ -324,7 +447,7 @@ export default function BaseTable(props: { onCreateNew: () => void; onStartProje
           </div>
         </div>
         <div className="flex justify-between items-center">
-          <span className="text-default-400 text-small">Total {projects.length} users</span>
+          <span className="text-default-400 text-small">Total {filteredItems.length} projects</span>
           <label className="flex items-center text-default-400 text-small">
             Rows per page:
             <select
@@ -347,31 +470,33 @@ export default function BaseTable(props: { onCreateNew: () => void; onStartProje
     onRowsPerPageChange,
     projects.length,
     hasSearchFilter,
+    ownerFilter,
+    account.address,
   ]);
 
-  const bottomContent = React.useMemo(() => {
-    return (
-      <div className="py-2 px-2 flex justify-between items-center">
-        <Pagination
-          showControls
-          classNames={{
-            cursor: "bg-foreground text-background",
-          }}
-          color="default"
-          isDisabled={hasSearchFilter}
-          page={page}
-          total={pages}
-          variant="light"
-          onChange={setPage}
-        />
-        <span className="text-small text-default-400">
-          {selectedKeys === "all"
-            ? "All items selected"
-            : `${selectedKeys.size} of ${items.length} selected`}
-        </span>
-      </div>
-    );
-  }, [selectedKeys, items.length, page, pages, hasSearchFilter]);
+  // const bottomContent = React.useMemo(() => {
+  //   return (
+  //     <div className="py-2 px-2 flex justify-between items-center">
+  //       <Pagination
+  //         showControls
+  //         classNames={{
+  //           cursor: "bg-foreground text-background",
+  //         }}
+  //         color="default"
+  //         isDisabled={hasSearchFilter}
+  //         page={page}
+  //         total={pages}
+  //         variant="light"
+  //         onChange={setPage}
+  //       />
+  //       <span className="text-small text-default-400">
+  //         {selectedKeys === "all"
+  //           ? "All items selected"
+  //           : `${selectedKeys.size} of ${items.length} selected`}
+  //       </span>
+  //     </div>
+  //   );
+  // }, [selectedKeys, items.length, page, pages, hasSearchFilter, account.address]);
 
   const classNames = React.useMemo(
     () => ({
@@ -397,7 +522,22 @@ export default function BaseTable(props: { onCreateNew: () => void; onStartProje
       // isCompact
       removeWrapper
       aria-label="Example table with custom cells, pagination and sorting"
-      bottomContent={bottomContent}
+      bottomContent={
+        <div className="py-2 px-2 flex justify-between items-center">
+        <Pagination
+          showControls
+          classNames={{
+            cursor: "bg-foreground text-background",
+          }}
+          color="default"
+          isDisabled={hasSearchFilter}
+          page={page}
+          total={pages}
+          variant="light"
+          onChange={setPage}
+        />
+      </div>
+      }
       bottomContentPlacement="outside"
       checkboxesProps={{
         classNames: {
@@ -430,14 +570,13 @@ export default function BaseTable(props: { onCreateNew: () => void; onStartProje
       <TableBody emptyContent={"No projects found"} items={sortedItems}>
         {(item) => (
           <TableRow key={item.projectId}>
-            {(columnKey) => <TableCell>{renderCell(item, columnKey)}</TableCell>}
+            {(columnKey) => <TableCell>{renderCell(item as any, columnKey)}</TableCell>}
           </TableRow>
         )}
       </TableBody>
     </Table>
   );
 }
-
 
 export function ProjectTableWithStartModal() {
   const { isOpen, onOpen, onClose } = useDisclosure();
@@ -455,7 +594,7 @@ export function ProjectTableWithStartModal() {
 
       <Modal hideCloseButton backdrop={"blur"} isOpen={startFormModal.isOpen} onClose={startFormModal.onClose}>
         <ModalContent >
-          {projectId && <StartProjectForm onClose={startFormModal.onClose} projectId={projectId} />}
+          {typeof projectId === 'number' ? <StartProjectForm onClose={startFormModal.onClose} projectId={projectId} /> : undefined}
         </ModalContent>
       </Modal>
     </>

@@ -47,6 +47,13 @@ const CheckIcon = ({size, height, width, ...props}: { size?: number, height?: nu
 };
 
 // const storage = createStorage({ storage: localStorage })
+const useEnsNameMocked = (props: { address: address }) => {
+  return {
+    data: 'test',
+    isPending: false,
+    isSuccess: true,
+  };
+}
 
 export function WalletUser(props: { address: address }) {
   const {data: name, isPending: isNamePending, isSuccess: isNameSuccess} = useEnsName({
@@ -76,7 +83,7 @@ export function WalletUser(props: { address: address }) {
     scopeKey  : 'wallet-user',
   });
 
-  console.log(name, avatar, isNamePending, isAvatarPending);
+  // console.log(name, avatar, isNamePending, isAvatarPending);
 
   return (
     <User
@@ -108,7 +115,7 @@ export function WalletUser(props: { address: address }) {
 
 export function WalletUsersScrollable(props: { addresses: address[] }) {
   return (
-    <ScrollShadow hideScrollBar className="w-[445px] h-[400px]">
+    <ScrollShadow hideScrollBar>
       {props.addresses.map(address => (
         <div className="p-1">
           <WalletUser key={address} address={address} />

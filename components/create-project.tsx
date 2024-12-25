@@ -61,7 +61,7 @@ export function CreateContractButton(props: { onStart: () => void }) {
       value={projectName}
       isDisabled={isLoading}
       onChange={e => {
-        console.log('Setting project name:', e.target.value);
+        // console.log('Setting project name:', e.target.value);
         setProjectName(e.target.value)
       }}
       onKeyDown={e => {
@@ -69,9 +69,10 @@ export function CreateContractButton(props: { onStart: () => void }) {
           onClick();
         }
       }}
+      className="pr-0 mr-0"
       endContent={
         <Button
-          className="bg-opacity-0	"
+          className="bg-opacity-0	mr-0 p-0 flex-none w-10"
           isDisabled={isLoading}
           onPress={onClick}
         >

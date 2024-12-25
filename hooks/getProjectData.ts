@@ -4,6 +4,7 @@ import abi from "@/contract/abi";
 import { CONTRACT_ADDRESS } from "@/contract/config";
 import { toProject, projectInfo, projectInfoToSensibleTypes } from '@/utils/project';
 import { useWatchContractEvent } from 'wagmi';
+import { LIVE_UPDATE } from '@/config/site';
 
 // TODO: Add events to the chain to make it easier
 // to live update this
@@ -15,12 +16,14 @@ export function useGetProjectCount() {
   });
 
   // TODO: Use events rather than polling
-  useEffect(() => {
-    setInterval(() => {
-      // console.log('refetching project count');
-      refetch();
-    }, 2_500);
-  }, []);
+  if (LIVE_UPDATE) {
+    useEffect(() => {
+      setInterval(() => {
+        // console.log('refetching project count');
+        refetch();
+      }, 2_500);
+    }, []);
+  }
 
   // useWatchContractEvent({
   //   address: CONTRACT_ADDRESS,
@@ -48,15 +51,15 @@ export function useGetProjectData() {
       })), [projectCount]);
   const { data: projects, refetch } = useReadContracts({ contracts });
 
-  console.log('projects', projectCount, contracts, projects);
-
   // TODO: Use events rather than polling
-  useEffect(() => {
-    setInterval(() => {
-      // console.log('refetching project count');
-      refetch();
-    }, 2_500);
-  }, []);
+  if (LIVE_UPDATE) {
+    useEffect(() => {
+      setInterval(() => {
+        // console.log('refetching project count');
+        refetch();
+      }, 2_500);
+    }, []);
+  }
 
   // FUTURE: Improve error handling behavior
   return useMemo(
