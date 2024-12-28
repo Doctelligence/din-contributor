@@ -17,6 +17,7 @@ export function useGetProjectCount() {
 
   // TODO: Use events rather than polling
   if (LIVE_UPDATE) {
+    // eslint-disable-next-line react-hooks/rules-of-hooks
     useEffect(() => {
       setInterval(() => {
         // console.log('refetching project count');
@@ -54,6 +55,7 @@ export function useGetProjectData() {
 
   // TODO: Use events rather than polling
   if (LIVE_UPDATE) {
+    // eslint-disable-next-line react-hooks/rules-of-hooks
     useEffect(() => {
       setInterval(() => {
         // console.log('refetching project count');

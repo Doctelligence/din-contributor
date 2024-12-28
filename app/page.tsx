@@ -14,8 +14,6 @@ import {
 import { Pagination } from "@nextui-org/pagination";
 import React from "react";
 import { Button } from "@nextui-org/button";
-
-// import { check } from "prettier";
 import { Alert } from "@nextui-org/alert";
 
 import { SQLContext } from "./providers";
@@ -121,8 +119,8 @@ function ContributorsAndValidatorsManager({
 
 function DisplayColumn(
   props:
-    | { columnKey: "name"; value: string }
-    | { columnKey: "wallet"; value: `0x${string}` }
+    | { columnKey: "name"; value: string; onChange: () => void }
+    | { columnKey: "wallet"; value: `0x${string}`; onChange: () => void }
     | { columnKey: "enabled"; value: boolean; onChange: () => void },
 ) {
   switch (props.columnKey) {
@@ -177,14 +175,10 @@ function WalletUserTable({
       >
         {(item) => (
           <TableRow key={item.wallet}>
-            {/* {
-          //@ts-ignore
-        (columnKey) => <DisplayColumn columnKey={co\
-        lumnKey} value={item[columnKey]} />
-        } */}
             {/* @ts-ignore */}
-            {(columnKey) => (
+            {(columnKey: "wallet" | "enabled") => (
               <TableCell>
+                {/* @ts-ignore */}
                 {DisplayColumn({
                   columnKey,
                   value: item[columnKey],
@@ -207,7 +201,7 @@ function WalletUserTable({
   );
 }
 
-function getAll() {
+function useGetAll() {
   const address = useAccount();
   const sql = useContext(SQLContext)[0] || [];
   const contributors = useMemo(
@@ -255,7 +249,7 @@ function getAll() {
 }
 
 function PendingContributions() {
-  const { all } = getAll();
+  const { all } = useGetAll();
   // const projects = useGetProjectData() || [];
   // const projectIds = projects.map(p => p.projectId).join(',');
 
@@ -317,7 +311,7 @@ function PendingContributions() {
 
 export default function Home() {
   const [checked, setChecked] = useState(false);
-  const { all, contributors, validators } = getAll();
+  const { all, contributors, validators } = useGetAll();
 
   useEffect(() => {
     if (all.length === 0) {

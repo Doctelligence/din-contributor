@@ -196,7 +196,10 @@ export function WalletUsersScrollable(props: {
   return (
     <ScrollShadow hideScrollBar>
       {props.addresses.map((address) => (
-        <div className="p-1">
+        <div
+          key={"div_" + address + props.type + props.project}
+          className="p-1"
+        >
           <WalletUser
             key={address + props.type + props.project}
             address={address}
