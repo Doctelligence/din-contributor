@@ -17,14 +17,16 @@ export interface StartProjectArgs {
 export function toStartProject(
   args: StartProjectArgs,
 ): AbiItemArgs<typeof abi, "startProject"> {
-  return [
+  const ret: AbiItemArgs<typeof abi, "startProject"> = [
     args.projectId,
     MOCK_ERC20_ADDRESS,
     args.contributorRewardAmount,
     args.validationRewardAmount,
     args.validationCommitmentDeadline,
     args.validationRevealDeadline,
-  ];
+  ]
+  console.log(ret)
+  return ret;
 }
 
 export interface Project {

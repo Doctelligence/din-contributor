@@ -108,7 +108,6 @@ export const Navbar = () => {
         justify="end"
       >
         <NavbarItem className="hidden sm:flex gap-2">
-          {/* <ProjectCount /> */}
           <ConnectWallet />
           <Link isExternal aria-label="Slack" href={siteConfig.links.slack}>
             <SlackIcon className="text-default-500" />
