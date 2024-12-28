@@ -2,7 +2,7 @@
 
 import { ChevronDownIcon, PlusIcon, SearchIcon, VerticalDotsIcon } from "@/components/icons";
 import { useGetProjectData } from "@/hooks/getProjectData";
-import { projectInfoToSensibleTypes } from "@/utils/project";
+import { canStartProject, projectInfoToSensibleTypes } from "@/utils/project";
 import { Button } from "@nextui-org/button";
 import { Chip, ChipProps } from "@nextui-org/chip";
 import { Dropdown, DropdownItem, DropdownMenu, DropdownTrigger } from "@nextui-org/dropdown";
@@ -113,7 +113,7 @@ export function Scrollable(props: { projectId: number; num: number; fn: 'getCont
   });
 
   return (
-    <WalletUsersScrollable addresses={res.data?.map(res => res.result).filter(res => typeof res === 'string') || []} />
+    <WalletUsersScrollable project={props.projectId.toString()} type={props.fn} addresses={res.data?.map(res => res.result).filter(res => typeof res === 'string') || []} />
   )
 }
 
@@ -122,11 +122,7 @@ export default function BaseTable(props: { onCreateNew: () => void; onStartProje
   const projectIds = projects.map(p => p.projectId).join(',');
   const sql = useContext(SQLContext)[0];
 
-  console.log('the sql context is', sql)
-
   useEffect(() => {
-    console.log('projects as ids', projects.map(p => p.projectId), sql);
-
     const ids = projects.map(p => p.projectId);
 
     const idOwnerMap = projects.reduce((acc, project) => {
@@ -145,11 +141,8 @@ export default function BaseTable(props: { onCreateNew: () => void; onStartProje
       const sqlIds = sql.map((p: Record<string, any>) => p.project);
       const missingIds = ids.filter(id => !sqlIds.includes(id));
 
-      console.log(sqlIds, missingIds);
-
       if (missingIds.length) {
         const db = neon(POSTGRES_URL);
-        console.log('performing insertions', missingIds)
         db.transaction(missingIds.map(id => db(`INSERT INTO ${TABLE_NAME} (project, owner, name, contributors, validators) VALUES ($1, $2, $3, $4, $5)`, [id, idOwnerMap[id], idNameMap[id], "", ""])))
           .then((...data) => console.log('insertions complete', data))
           .catch((e) => console.error('insertions failed', e));
@@ -296,7 +289,7 @@ export default function BaseTable(props: { onCreateNew: () => void; onStartProje
               </DropdownTrigger>
               <DropdownMenu>
                 {/* <DropdownItem key={"addr"}>{user.currentAddress}</DropdownItem> */}
-                {user.isOwner ? <DropdownItem onPress={() => props.onStartProject(user.projectId)} key="start">Start Project</DropdownItem> : <></>}
+                {(user.isOwner && canStartProject(user)) ? <DropdownItem onPress={() => props.onStartProject(user.projectId)} key="start">Start Project</DropdownItem> : <></>}
                 {!user.isOwner ? <DropdownItem key="view" onPress={() => {
                   // const db = neon(POSTGRES_URL);
 
@@ -325,8 +318,6 @@ export default function BaseTable(props: { onCreateNew: () => void; onStartProje
         return cellValue as string | number | boolean;
     }
   }, []);
-  
-  console.log('address is', account.address);
 
   const onRowsPerPageChange = React.useCallback((e: React.ChangeEvent<HTMLSelectElement>) => {
     setRowsPerPage(Number(e.target.value));

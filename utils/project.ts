@@ -1,18 +1,12 @@
 import abi from '@/contract/abi';
-import { useWriteContract } from 'wagmi';
-import { ReadContractReturnType, ContractFunctionArgs, ExtractAbiItem, AbiItemName, AbiItemArgs, Abi, GetAbiItemReturnType, ParseAbiParameters, AbiFunction, AbiParameter } from 'viem';
+import { MOCK_ERC20_ADDRESS } from '@/contract/config';
+import { AbiItemArgs, ReadContractReturnType } from 'viem';
 
-type Project2 = ContractFunctionArgs<typeof abi, 'nonpayable', 'startProject'>;
-type Name = ExtractAbiItem<typeof abi, 'startProject'>['inputs'];
-type Name2 = AbiItemName<typeof abi>;
 type Args = AbiItemArgs<typeof abi, 'startProject'>;
-type ProjectInfoArgs = AbiItemArgs<typeof abi, 'projectInfo'>;
 type ProjectReturnArgs = ReadContractReturnType<typeof abi, 'projectInfo'>;
-type ProjectArgs = GetAbiItemReturnType<typeof abi, 'projects'>['outputs'];
 
 export interface StartProjectArgs {
   projectId: Args[0],
-  rewardToken: Args[1],
   contributorRewardAmount: Args[2],
   validationRewardAmount: Args[3],
   validationCommitmentDeadline: Args[4],
@@ -22,7 +16,7 @@ export interface StartProjectArgs {
 export function toStartProject(args: StartProjectArgs): AbiItemArgs<typeof abi, 'startProject'> {
   return [
     args.projectId,
-    args.rewardToken,
+    MOCK_ERC20_ADDRESS,
     args.contributorRewardAmount,
     args.validationRewardAmount,
     args.validationCommitmentDeadline,
@@ -79,7 +73,7 @@ export function fromProject(project: Project): any {
   ];
 }
 
-export function canStartProject(project: Project) {
+export function canStartProject(project: {  active: boolean, numValidators: number, numContributors: number }) {
   return project.active === false
     && project.numValidators > 0
     && project.numContributors > 0;

@@ -88,6 +88,12 @@ export const StartProjectForm = (props: ProjectFormProps) => {
   //   }
   // }, [isOpen, mintStatus]);
 
+  useEffect(() => {
+    if (status === 'success' || status === 'error') {
+      props.onClose();
+    }
+  }, [status]);
+
   return (
     <div>
       <Form
@@ -112,7 +118,6 @@ export const StartProjectForm = (props: ProjectFormProps) => {
               validationRevealDeadline: BigInt(validatorDeadline.toDate('utc').valueOf()),
               projectId: BigInt(props.projectId),
             });
-            props.onClose();
             // props.onSubmit(data as unknown as StartProjectForm);
           }
         }}
@@ -166,13 +171,13 @@ export const StartProjectForm = (props: ProjectFormProps) => {
         />
 
         <span style={{ width: '100%', display: 'flex', justifyContent: 'space-between' }}>
-          <Button type="reset" variant="flat">
+          <Button type="reset" variant="flat" isDisabled={status !== 'idle'}>
             Reset
           </Button>
           {rate && <Button type="reset" variant="flat" isDisabled style={{ float: 'right' }}>
             {rate ? 'Cost $' + Math.round((validatorAmount + contributorAmount) * rate * 100) / 100 : ''}
           </Button>}
-          <Button color="primary" type="submit">
+          <Button color="primary" type="submit" isDisabled={status !== 'idle'}>
             Submit
           </Button>
         </span>

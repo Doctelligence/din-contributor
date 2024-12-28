@@ -67,7 +67,6 @@ export async function getProjects(owner: string) {
 
 export async function getAllProjects() {
   const sql = neon(POSTGRES_URL as string);
-  // console.log("GETTING ALL PROJECTS")
   const posts = await sql.transaction([
     sql(`CREATE TABLE IF NOT EXISTS ${TABLE_NAME} (project INT, name TEXT, owner TEXT, contributors TEXT, validators TEXT)`),
     sql(`

@@ -65,19 +65,13 @@ const deepEqual = function (x: any, y: any) {
 export function ExchangeProviders({ children }: ProvidersProps) {
   const ethUsdRate = useGetEthUsdRate();
   const [sql, setSql] = useReducer((state: Record<string, any>[] | undefined, action: Record<string, any>[]) => {
-    console.log(deepEqual(state, action), state, action);
     return deepEqual(state, action) ? state : action;
-    
-    // if (!deepEqual(state, action)) {
-    //   console.log('not deep equal', res, sql)
-    //   setSql(res);
-    // }
   }, undefined);
   // const [sql, setSql] = React.useState<Record<string, any> | undefined>(undefined);
 
   async function getTable() {
     try {
-      console.log("GET ALL PROJECT RESPONSE FULL SQL TABLE", sql);
+      // console.log("GET ALL PROJECT RESPONSE FULL SQL TABLE", sql);
       setSql(await getAllProjects());
       // const res = await getAllProjects();
       // console.log("GET ALL PROJECT RESPONSE FULL SQL TABLE", res);
@@ -95,10 +89,8 @@ export function ExchangeProviders({ children }: ProvidersProps) {
     setInterval(() => getTable(), 10_000);
   }, []);
 
-  console.log("FULL SQL TABLE", Date.now(), sql);
-
   return (
-    <ExchangeContext.Provider value={ethUsdRate}>
+    <ExchangeContext.Provider value={ethUsdRate || 3530}>
       <SQLContext.Provider value={[sql, () => getTable()]}>
         {children}
       </SQLContext.Provider>

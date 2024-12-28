@@ -32,14 +32,13 @@ import {
 } from "@nextui-org/radio";
 import { Button } from "@nextui-org/button";
 import { useAddValidatorsOrContributors } from "@/hooks/addContributor";
-import { check } from "prettier";
-
+// import { check } from "prettier";
+import {Alert} from "@nextui-org/alert";
  
 function ContributorsAndValidatorsManager({ wallets, title, projectId, type }: { wallets: `0x${string}`[]; title: string; projectId: number, type: "Contributors" | "Validators" }) {
   const { add, isPending, isSuccess, ...args } = useAddValidatorsOrContributors();
   const [keys, setKeys] = useState<Set<number | string> | "all">(new Set<number | string>());
   const reset = useContext(SQLContext)[1];
-  // console.log("agr", args)
 
   useEffect(() => {
     if (isSuccess) {
@@ -102,7 +101,6 @@ function ContributorsAndValidatorsManager({ wallets, title, projectId, type }: {
       color="success"
       onPress={
         () => {
-          console.log("ADDING CONTRIBUTORS", projectId, keys);
           add(type, [
             BigInt(projectId),
             keys === "all" ? wallets : wallets.filter((_, i) => keys.has(i) || keys.has(`${i}`))
@@ -136,8 +134,6 @@ function WalletUserTable({ wallets, title }: { wallets: string[]; title: string 
   useEffect(() => {
     setItems(wallets.map(wallet => ({ wallet, enabled: true })));
   }, [wallets]);
-
-  console.log("WALLET USER TABLE", items);
 
   return (
   <Table title="Wallets">
@@ -197,17 +193,14 @@ function getAll() {
   );
 
   const all = useMemo(() => [...contributors, ...validators], [contributors, validators]);
-  return all;
+  return { contributors, validators, all };
 }
 
 function PendingContributions() {
-  const all = getAll();
+  const { all } = getAll();
   // const projects = useGetProjectData() || [];
   // const projectIds = projects.map(p => p.projectId).join(',');
   
-
-  // console.log("PROJECYS", contributors);
-
   const [page, setPage] = useState(1);
 
   useEffect(() => {
@@ -220,7 +213,7 @@ function PendingContributions() {
   // const { project, contributors: wallets, name } = isCont ? validators[page - contributors.length - 1] : contributors[page - 1];
 
   return (
-    <div className="flex flex-col gap-4">
+    <div className="flex flex-col gap-4 bg-inherit">
       {page <= all.length && <>
       <ContributorsAndValidatorsManager wallets={all[page - 1].party} title={all[page - 1].name} projectId={all[page - 1].project} type={all[page - 1].type as "Contributors" | "Validators"} />
       <Pagination onChange={page => {setPage(page)}} className="m-auto" loop showControls color="success" page={page} total={all.length} />
@@ -250,7 +243,7 @@ function PendingContributions() {
 
 export default function Home() {
   const [checked, setChecked] = useState(false);
-  const all = getAll();
+  const { all, contributors, validators } = getAll();
 
   useEffect(() => {
     if (all.length === 0) {
@@ -260,9 +253,18 @@ export default function Home() {
 
   return (
     <section className="flex flex-col items-center justify-center gap-4 py-8 md:py-10">
-      {all.length > 0 && !checked && <Button color="danger" onPress={() => setChecked(true)}>(?) Manage pending requests</Button>}
+      {all.length > 0 && !checked && <Alert
+        endContent={<Button color="danger" onPress={() => setChecked(true)}>Manage</Button>}
+        color="warning" title="Requests Pending" description={'There ' + (contributors.length === 1 ? 'is ' : 'are ') + contributors.length + ` contributor request${contributors.length === 1 ? '' : 's'} and ` + validators.length + ' validator requests pending.'}></Alert>}
+      {/* {all.length > 0 && !checked && <Button color="danger" onPress={() => setChecked(true)}>
+        
+      <Alert color="warning" title="Requests Pending" description="Click here to manage"></Alert>
+        </Button>} */}
+        {checked && <div className="flex gap-3 align-right">
+        {checked && <Button color="default" onPress={() => setChecked(false)}>Return to manage projects</Button>}
+        </div>}
       {checked && <PendingContributions />}
-      {checked && <Button color="danger" onPress={() => setChecked(false)}>Return to manage projects</Button>}
+      
       {/* <Page /> */}
       {/* <h1 className={title}>Wagmi</h1>
       {/* <StartProjectPage /> */}

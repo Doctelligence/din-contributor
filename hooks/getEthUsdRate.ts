@@ -31,7 +31,5 @@ export function useGetEthUsdRate() {
   // Log storage content to check if caching is working
   // console.log('Storage content:', JSON.stringify(localStorage.getItem('wagmi.store'), null, 2));
 
-  console.log(data, args);
-
   return data ? (Math.round(Number(data[1]) / 1e6) / 1e2) : undefined;
 }

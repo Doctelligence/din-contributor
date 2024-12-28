@@ -9,7 +9,7 @@ import {
 } from "@/components/icons";
 import { CONTRACT_ADDRESS } from "@/contract/config";
 import abi from "@/contract/abi";
-import { useAccount, useReadContract, useConnect, useEnsAddress, useEnsName } from "wagmi";
+import { useAccount, useReadContract, useConnect } from "wagmi";
 import { Code } from "@nextui-org/code";
 
 export const ConnectWallet = () => {

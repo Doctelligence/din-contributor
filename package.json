@@ -7,12 +7,13 @@
 		"build": "next build",
 		"build:types": "typechain --target ethers-v5 --out-dir ./contractTypes './temp/DINManager.json'",
 		"start": "next start",
-		"lint": "eslint . --ext .ts,.tsx -c .eslintrc.json --fix",
+		"lint": "eslint app/ components/ config/ hooks/ types/ utils/ providers/ contract/ -c eslint.config.mjs --fix",
 		"create": "ts-node ./scripts/fetchContractData.ts"
 	},
 	"dependencies": {
 		"@internationalized/date": "^3.6.0",
 		"@neondatabase/serverless": "^0.10.4",
+		"@nextui-org/alert": "^2.2.8",
 		"@nextui-org/button": "^2.2.3",
 		"@nextui-org/chip": "^2.2.4",
 		"@nextui-org/code": "^2.2.3",

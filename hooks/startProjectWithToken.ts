@@ -4,18 +4,16 @@ import { useCreateRewardToken } from './createRewardToken';
 import { StartProjectArgs } from '@/utils/project';
 
 export const useStartProjectWithToken = () => {
-  const { startProject, status: startProjectStatus, reset: resetProject } = useStartProject();
-  const { createRewardToken, status: createRewardTokenStatus, data, reset } = useCreateRewardToken();
+  const { startProject, status: startProjectStatus, reset: resetProject, ...startargs } = useStartProject();
+  const { createRewardToken, status: createRewardTokenStatus, data, reset, variables, ...args } = useCreateRewardToken();
   const [ projectArgs, setProjectArgs ] = useState<Omit<StartProjectArgs, 'rewardToken'>>();
   const [ status, setStatus ] = useState<"error" | "idle" | "pendingToken" | "pendingProject" | "success">("idle");
 
   useEffect(() => {
+    console.log({createRewardTokenStatus, projectArgs, data, startProjectStatus, startProjectArgs: startargs, createArgs: args});
     if (createRewardTokenStatus === 'success' && projectArgs) {
       reset();
-      startProject({
-        ...projectArgs,
-        rewardToken: data,
-      });
+      startProject(projectArgs);
       setProjectArgs(undefined);
       setStatus("pendingProject");
     } else if (startProjectStatus === 'success') {
@@ -24,6 +22,12 @@ export const useStartProjectWithToken = () => {
     } else if (createRewardTokenStatus === 'error' || startProjectStatus === 'error') {
       reset();
       resetProject();
+      if (createRewardTokenStatus === 'error') {
+        alert("Failed to create reward token. Error:" + args.error);
+      }
+      if (startProjectStatus === 'error') {
+        alert("Failed to start project. Error:" + startargs.error);
+      }
       setStatus("error");
     }
   }, [startProjectStatus, createRewardTokenStatus]);

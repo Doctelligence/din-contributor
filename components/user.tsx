@@ -47,16 +47,39 @@ const CheckIcon = ({size, height, width, ...props}: { size?: number, height?: nu
 };
 
 // const storage = createStorage({ storage: localStorage })
-const useEnsNameMocked = (props: { address: address }) => {
-  return {
-    data: 'test',
-    isPending: false,
-    isSuccess: true,
-  };
+const useEnsNameMock = (props: Parameters<typeof useEnsName>[0]) => {
+  switch (props?.address) {
+    case '0xb17431E497dd0289e076dAF827C036ea90e17cDb':
+      return {data: 'doctelligence.eth', isPending: false, isSuccess: true};
+    case '0xC771cb2F591001eee1690CC8A82f0045A774A4BC':
+      return {data: 'maqHospital.eth', isPending: false, isSuccess: true};
+    case '0x08A145aa878ee6cd95f407E05e559bE33786Ba0D':
+      return {data: 'oxHospital.eth', isPending: false, isSuccess: true};
+    default:
+      return {data: undefined, isPending: false, isSuccess: false};
+  }
+
+  // 0x08A145aa878ee6cd95f407E05e559bE33786Ba0D
+  // https://euc.li/doctelligence.eth
+}
+
+const useEnsAvatarMock = (props: Parameters<typeof useEnsAvatar>[0]) => {
+  switch (props?.name) {
+    case 'doctelligence.eth':
+      return {data: 'https://euc.li/doctelligence.eth', isPending: false, isSuccess: true};
+    case 'maqHospital.eth':
+      return {data: 'https://cdn12.picryl.com/photo/2016/12/31/teddy-teddy-bear-soft-toy-b8e25b-1024.jpg', isPending: false, isSuccess: true};
+    case 'oxHospital.eth':
+      return {data: 'https://upload.wikimedia.org/wikipedia/commons/2/20/Bodleian_Library_and_nearby_buildings.jpg', isPending: false, isSuccess: true};
+    default:
+      return {data: undefined, isPending: false, isSuccess: false};
+  }
+
+  // https://euc.li/doctelligence.eth
 }
 
 export function WalletUser(props: { address: address }) {
-  const {data: name, isPending: isNamePending, isSuccess: isNameSuccess} = useEnsName({
+  const {data: name, isPending: isNamePending, isSuccess: isNameSuccess} = useEnsNameMock({
     address: props.address,
     chainId: mainnet.id,
     config: {
@@ -69,7 +92,7 @@ export function WalletUser(props: { address: address }) {
     },
     scopeKey  : 'wallet-user',
   });
-  const {data: avatar, isPending: isAvatarPending} = useEnsAvatar({
+  const {data: avatar, isPending: isAvatarPending} = useEnsAvatarMock({
     name: typeof name === 'string' ? name : undefined,
     chainId: mainnet.id,
     config: {
@@ -113,12 +136,12 @@ export function WalletUser(props: { address: address }) {
   );
 }
 
-export function WalletUsersScrollable(props: { addresses: address[] }) {
+export function WalletUsersScrollable(props: { addresses: address[]; project: string; type: string }) {
   return (
     <ScrollShadow hideScrollBar>
       {props.addresses.map(address => (
         <div className="p-1">
-          <WalletUser key={address} address={address} />
+          <WalletUser key={address + props.type + props.project} address={address} />
         </div>
       ))}
     </ScrollShadow>
