@@ -58,7 +58,6 @@ export function useGetProjectData() {
     // eslint-disable-next-line react-hooks/rules-of-hooks
     useEffect(() => {
       setInterval(() => {
-        // console.log('refetching project count');
         refetch();
       }, 2_500);
     }, []);
