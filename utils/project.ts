@@ -1,19 +1,22 @@
-import abi from '@/contract/abi';
-import { MOCK_ERC20_ADDRESS } from '@/contract/config';
-import { AbiItemArgs, ReadContractReturnType } from 'viem';
+import { AbiItemArgs, ReadContractReturnType } from "viem";
 
-type Args = AbiItemArgs<typeof abi, 'startProject'>;
-type ProjectReturnArgs = ReadContractReturnType<typeof abi, 'projectInfo'>;
+import abi from "@/contract/abi";
+import { MOCK_ERC20_ADDRESS } from "@/contract/config";
+
+type Args = AbiItemArgs<typeof abi, "startProject">;
+type ProjectReturnArgs = ReadContractReturnType<typeof abi, "projectInfo">;
 
 export interface StartProjectArgs {
-  projectId: Args[0],
-  contributorRewardAmount: Args[2],
-  validationRewardAmount: Args[3],
-  validationCommitmentDeadline: Args[4],
-  validationRevealDeadline: Args[5],
+  projectId: Args[0];
+  contributorRewardAmount: Args[2];
+  validationRewardAmount: Args[3];
+  validationCommitmentDeadline: Args[4];
+  validationRevealDeadline: Args[5];
 }
 
-export function toStartProject(args: StartProjectArgs): AbiItemArgs<typeof abi, 'startProject'> {
+export function toStartProject(
+  args: StartProjectArgs,
+): AbiItemArgs<typeof abi, "startProject"> {
   return [
     args.projectId,
     MOCK_ERC20_ADDRESS,
@@ -25,18 +28,18 @@ export function toStartProject(args: StartProjectArgs): AbiItemArgs<typeof abi, 
 }
 
 export interface Project {
-  active: boolean,
-  name: string,
-  owner: string,
-  rewardToken: string,
-  contributorRewardAmount: number,
-  validatorRewardAmount: number,
-  validationCommitmentDeadline: number,
-  validationRevealDeadline: number,
-  numContributors: number,
-  numValidators: number,
-  totalScore: number,
-  totalSuccessfulValidations: number,
+  active: boolean;
+  name: string;
+  owner: string;
+  rewardToken: string;
+  contributorRewardAmount: number;
+  validatorRewardAmount: number;
+  validationCommitmentDeadline: number;
+  validationRevealDeadline: number;
+  numContributors: number;
+  numValidators: number;
+  totalScore: number;
+  totalSuccessfulValidations: number;
 }
 
 export function toProject(data: any[]): Project {
@@ -73,46 +76,75 @@ export function fromProject(project: Project): any {
   ];
 }
 
-export function canStartProject(project: {  active: boolean, numValidators: number, numContributors: number }) {
-  return project.active === false
-    && project.numValidators > 0
-    && project.numContributors > 0;
+export function canStartProject(project: {
+  active: boolean;
+  numValidators: number;
+  numContributors: number;
+}) {
+  return (
+    project.active === false &&
+    project.numValidators > 0 &&
+    project.numContributors > 0
+  );
 }
 
 interface ProjectInfoReturnType {
-  owner: ProjectReturnArgs[0],
-  name: ProjectReturnArgs[1],
-  active: ProjectReturnArgs[2],
-  rewardToken: ProjectReturnArgs[3],
-  contributorRewardAmount: ProjectReturnArgs[4],
-  validatorRewardAmount: ProjectReturnArgs[5],
-  validationCommitmentDeadline: ProjectReturnArgs[6],
-  validationRevealDeadline: ProjectReturnArgs[7],
-  numContributors: ProjectReturnArgs[8],
-  numValidators: ProjectReturnArgs[9],
-  totalScore: ProjectReturnArgs[10],
-  totalSuccessfulValidations: ProjectReturnArgs[11],
+  owner: ProjectReturnArgs[0];
+  name: ProjectReturnArgs[1];
+  active: ProjectReturnArgs[2];
+  rewardToken: ProjectReturnArgs[3];
+  contributorRewardAmount: ProjectReturnArgs[4];
+  validatorRewardAmount: ProjectReturnArgs[5];
+  validationCommitmentDeadline: ProjectReturnArgs[6];
+  validationRevealDeadline: ProjectReturnArgs[7];
+  numContributors: ProjectReturnArgs[8];
+  numValidators: ProjectReturnArgs[9];
+  totalScore: ProjectReturnArgs[10];
+  totalSuccessfulValidations: ProjectReturnArgs[11];
 }
 
-export function projectInfo(rawResult: ProjectReturnArgs) : ProjectInfoReturnType {
-  const keys = ["owner", "name", "active", "rewardToken", "contributorRewardAmount", "validatorRewardAmount", "validationCommitmentDeadline", "validationRevealDeadline", "numContributors", "numValidators", "totalScore", "totalSuccessfulValidations"];
+export function projectInfo(
+  rawResult: ProjectReturnArgs,
+): ProjectInfoReturnType {
+  const keys = [
+    "owner",
+    "name",
+    "active",
+    "rewardToken",
+    "contributorRewardAmount",
+    "validatorRewardAmount",
+    "validationCommitmentDeadline",
+    "validationRevealDeadline",
+    "numContributors",
+    "numValidators",
+    "totalScore",
+    "totalSuccessfulValidations",
+  ];
 
-  const result : any = {}
+  const result: any = {};
+
   for (let i = 0; i < keys.length; i++) {
-      result[keys[i]] = rawResult[i];
+    result[keys[i]] = rawResult[i];
   }
 
   return result;
 }
 
-export function projectInfoToSensibleTypes(project: ProjectInfoReturnType, projectId: number) {
+export function projectInfoToSensibleTypes(
+  project: ProjectInfoReturnType,
+  projectId: number,
+) {
   return {
     ...project,
     active: Boolean(project.active),
     contributorRewardAmount: Number(project.contributorRewardAmount),
     validatorRewardAmount: Number(project.validatorRewardAmount),
-    validationCommitmentDeadline: new Date(Number(project.validationCommitmentDeadline)),
-    validationRevealDeadline: new Date(Number(project.validationRevealDeadline)),
+    validationCommitmentDeadline: new Date(
+      Number(project.validationCommitmentDeadline),
+    ),
+    validationRevealDeadline: new Date(
+      Number(project.validationRevealDeadline),
+    ),
     numContributors: Number(project.numContributors),
     numValidators: Number(project.numValidators),
     totalScore: Number(project.totalScore),

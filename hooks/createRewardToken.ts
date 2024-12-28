@@ -1,6 +1,7 @@
-import { useWriteContract } from 'wagmi';
-import { MOCK_ERC20_ADDRESS } from '@/contract/config';
-import erc from '@/contract/ercabi';
+import { useWriteContract } from "wagmi";
+
+import { MOCK_ERC20_ADDRESS } from "@/contract/config";
+import erc from "@/contract/ercabi";
 
 export const useCreateRewardToken = () => {
   const { writeContract, ...args } = useWriteContract();
@@ -11,8 +12,8 @@ export const useCreateRewardToken = () => {
         address: MOCK_ERC20_ADDRESS,
         abi: erc,
         args: [value],
-        functionName: 'mint',
-      })
+        functionName: "mint",
+      });
     },
     ...args,
   };

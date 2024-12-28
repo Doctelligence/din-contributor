@@ -180,24 +180,52 @@ export const HeartFilledIcon = ({
 );
 
 export const PlugIcon = (props: IconSvgProps) => (
-<svg 
-  aria-hidden="true"
-  fill="none"
-  focusable="false"
-  height="1em"
-  role="presentation"
-  viewBox="0 0 24 24"
-  width="1em"
-  {...props}
->
-  <rect stroke="currentColor" x="8" y="12" width="8" height="10" rx="1" ry="1" fill="#555" />
-  
-  <rect stroke="currentColor" x="9.5" y="4" width="1.5" height="8" fill="#999" />
-  <rect stroke="currentColor" x="13" y="4" width="1.5" height="8" fill="#999" />
-  
-  <path stroke="currentColor" d="M12,22 Q12,24 16,24" stroke-width="0.5" fill="none" />
-</svg>
-)
+  <svg
+    aria-hidden="true"
+    fill="none"
+    focusable="false"
+    height="1em"
+    role="presentation"
+    viewBox="0 0 24 24"
+    width="1em"
+    {...props}
+  >
+    <rect
+      fill="#555"
+      height="10"
+      rx="1"
+      ry="1"
+      stroke="currentColor"
+      width="8"
+      x="8"
+      y="12"
+    />
+
+    <rect
+      fill="#999"
+      height="8"
+      stroke="currentColor"
+      width="1.5"
+      x="9.5"
+      y="4"
+    />
+    <rect
+      fill="#999"
+      height="8"
+      stroke="currentColor"
+      width="1.5"
+      x="13"
+      y="4"
+    />
+
+    <path
+      d="M12,22 Q12,24 16,24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="0.5"
+    />
+  </svg>
+);
 
 export const SearchIcon = (props: IconSvgProps) => (
   <svg
@@ -255,7 +283,10 @@ export const NextUILogo: React.FC<IconSvgProps> = (props) => {
   );
 };
 
-export const ChevronDownIcon = ({ strokeWidth = 1.5, ...otherProps }: IconSvgProps) => {
+export const ChevronDownIcon = ({
+  strokeWidth = 1.5,
+  ...otherProps
+}: IconSvgProps) => {
   return (
     <svg
       aria-hidden="true"
@@ -273,12 +304,18 @@ export const ChevronDownIcon = ({ strokeWidth = 1.5, ...otherProps }: IconSvgPro
         strokeLinecap="round"
         strokeLinejoin="round"
         strokeMiterlimit={10}
-        strokeWidth={strokeWidth} />
+        strokeWidth={strokeWidth}
+      />
     </svg>
   );
 };
 
-export const PlusIcon = ({ size = 24, width, height, ...props }: IconSvgProps) => {
+export const PlusIcon = ({
+  size = 24,
+  width,
+  height,
+  ...props
+}: IconSvgProps) => {
   return (
     <svg
       aria-hidden="true"
@@ -304,7 +341,12 @@ export const PlusIcon = ({ size = 24, width, height, ...props }: IconSvgProps) =
   );
 };
 
-export const VerticalDotsIcon = ({ size = 24, width, height, ...props }: IconSvgProps) => {
+export const VerticalDotsIcon = ({
+  size = 24,
+  width,
+  height,
+  ...props
+}: IconSvgProps) => {
   return (
     <svg
       aria-hidden="true"
@@ -318,12 +360,18 @@ export const VerticalDotsIcon = ({ size = 24, width, height, ...props }: IconSvg
     >
       <path
         d="M12 10c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2zm0-6c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2zm0 12c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2z"
-        fill="currentColor" />
+        fill="currentColor"
+      />
     </svg>
   );
 };
 
-export const ArrowIcon = ({ size = 24, width, height, ...props }: IconSvgProps) => {
+export const ArrowIcon = ({
+  size = 24,
+  width,
+  height,
+  ...props
+}: IconSvgProps) => {
   return (
     <svg
       aria-hidden="true"
@@ -337,7 +385,8 @@ export const ArrowIcon = ({ size = 24, width, height, ...props }: IconSvgProps) 
     >
       <path
         d="M 12 0 C 5.382812 0 0 5.382812 0 12 C 0 18.617188 5.382812 24 12 24 C 18.617188 24 24 18.617188 24 12 C 24 5.382812 18.617188 0 12 0 Z M 16.40625 12.769531 L 10.589844 18.589844 C 10.375 18.800781 10.097656 18.910156 9.816406 18.910156 C 9.539062 18.910156 9.261719 18.800781 9.046875 18.589844 C 8.621094 18.164062 8.621094 17.472656 9.046875 17.046875 L 14.09375 12 L 9.046875 6.953125 C 8.621094 6.527344 8.621094 5.835938 9.046875 5.410156 C 9.472656 4.984375 10.164062 4.984375 10.589844 5.410156 L 16.40625 11.226562 C 16.613281 11.433594 16.726562 11.710938 16.726562 12 C 16.726562 12.289062 16.613281 12.566406 16.40625 12.769531 Z M 16.40625 12.769531 "
-        fill="currentColor" />
+        fill="currentColor"
+      />
     </svg>
   );
-}
+};

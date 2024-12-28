@@ -1,12 +1,13 @@
 "use client";
 
-import { ChevronDownIcon, PlusIcon, SearchIcon, VerticalDotsIcon } from "@/components/icons";
-import { useGetProjectData } from "@/hooks/getProjectData";
-import { canStartProject, projectInfoToSensibleTypes } from "@/utils/project";
 import { Button } from "@nextui-org/button";
-import { Chip, ChipProps } from "@nextui-org/chip";
-import { Dropdown, DropdownItem, DropdownMenu, DropdownTrigger } from "@nextui-org/dropdown";
-import { Checkbox } from "@nextui-org/checkbox";
+import { Chip } from "@nextui-org/chip";
+import {
+  Dropdown,
+  DropdownItem,
+  DropdownMenu,
+  DropdownTrigger,
+} from "@nextui-org/dropdown";
 import { Input } from "@nextui-org/input";
 import { Pagination } from "@nextui-org/pagination";
 import {
@@ -20,19 +21,33 @@ import {
   TableRow,
 } from "@nextui-org/table";
 import { User } from "@nextui-org/user";
-import React, { use, useCallback, useContext, useEffect } from "react";
-import { WalletUser, WalletUsersScrollable } from "../user";
+import React, { useCallback, useContext, useEffect } from "react";
 import { Modal, ModalContent, useDisclosure } from "@nextui-org/modal";
 import { Tooltip } from "@nextui-org/tooltip";
-import { CreateContractButton, CreateContractModal } from "../create-project";
-import { StartProjectForm, StartProjectPage } from "../start-project";
-import { OwnerButton } from "./ownerButton";
 import { useAccount, useReadContracts } from "wagmi";
+import { neon } from "@neondatabase/serverless";
+
+import { WalletUser, WalletUsersScrollable } from "../user";
+import { CreateContractModal } from "../create-project";
+import { StartProjectForm } from "../start-project";
+
+import { OwnerButton } from "./ownerButton";
+
 import { SQLContext } from "@/app/providers";
-import   { neon } from "@neondatabase/serverless"
-import { appendContributors, appendValidators, POSTGRES_URL, TABLE_NAME,  } from "@/app/postgres";
-import { TABLE_VERSIONS } from "@/config/site";
-import { ac } from "@upstash/redis/zmscore-Dc6Llqgr";
+import {
+  appendContributors,
+  appendValidators,
+  POSTGRES_URL,
+  TABLE_NAME,
+} from "@/app/postgres";
+import { canStartProject, projectInfoToSensibleTypes } from "@/utils/project";
+import { useGetProjectData } from "@/hooks/getProjectData";
+import {
+  ChevronDownIcon,
+  PlusIcon,
+  SearchIcon,
+  VerticalDotsIcon,
+} from "@/components/icons";
 import abi from "@/contract/abi";
 import { CONTRACT_ADDRESS } from "@/contract/config";
 
@@ -50,13 +65,13 @@ type User = ReturnType<typeof projectInfoToSensibleTypes>;
 // projectId,
 
 export const columns = [
-  {name: "ID", uid: "projectId", sortable: true},
-  {name: "OWNER", uid: "owner", sortable: true},
-  {name: "NAME", uid: "name", sortable: true},
-  {name: "CONTRIBUTORS", uid: "numContributors", sortable: true},
-  {name: "VALIDATORS", uid: "numValidators", sortable: true},
-  {name: "STATUS", uid: "active", sortable: true},
-  {name: "ACTIONS", uid: "actions"},
+  { name: "ID", uid: "projectId", sortable: true },
+  { name: "OWNER", uid: "owner", sortable: true },
+  { name: "NAME", uid: "name", sortable: true },
+  { name: "CONTRIBUTORS", uid: "numContributors", sortable: true },
+  { name: "VALIDATORS", uid: "numValidators", sortable: true },
+  { name: "STATUS", uid: "active", sortable: true },
+  { name: "ACTIONS", uid: "actions" },
   // {name: "ID", uid: "id", sortable: true},
   // // {name: "NAME", uid: "name", sortable: true},
   // {name: "AGE", uid: "age", sortable: true},
@@ -68,9 +83,9 @@ export const columns = [
 ];
 
 export const statusOptions = [
-  {name: "Active", uid: "active"},
-  {name: "Paused", uid: "paused"},
-  {name: "Vacation", uid: "vacation"},
+  { name: "Active", uid: "active" },
+  { name: "Paused", uid: "paused" },
+  { name: "Vacation", uid: "vacation" },
 ];
 
 export function capitalize(s: string) {
@@ -102,51 +117,80 @@ const INITIAL_VISIBLE_COLUMNS = [
 
 // }
 
-export function Scrollable(props: { projectId: number; num: number; fn: 'getContributor' | 'getValidator' }) {
+export function Scrollable(props: {
+  projectId: number;
+  num: number;
+  fn: "getContributor" | "getValidator";
+}) {
   const res = useReadContracts({
     contracts: new Array(props.num).fill(undefined).map((_, i) => ({
       address: CONTRACT_ADDRESS as `0x${string}`,
       abi,
-      functionName: props.fn as 'getContributor' | 'getValidator',
+      functionName: props.fn as "getContributor" | "getValidator",
       args: [BigInt(props.projectId), BigInt(i)],
     })),
   });
 
   return (
-    <WalletUsersScrollable project={props.projectId.toString()} type={props.fn} addresses={res.data?.map(res => res.result).filter(res => typeof res === 'string') || []} />
-  )
+    <WalletUsersScrollable
+      addresses={
+        res.data
+          ?.map((res) => res.result)
+          .filter((res) => typeof res === "string") || []
+      }
+      project={props.projectId.toString()}
+      type={props.fn}
+    />
+  );
 }
 
-export default function BaseTable(props: { onCreateNew: () => void; onStartProject: (projectId: number) => void }) {
+export default function BaseTable(props: {
+  onCreateNew: () => void;
+  onStartProject: (projectId: number) => void;
+}) {
   const projects = useGetProjectData() || [];
-  const projectIds = projects.map(p => p.projectId).join(',');
+  const projectIds = projects.map((p) => p.projectId).join(",");
   const sql = useContext(SQLContext)[0];
 
   useEffect(() => {
-    const ids = projects.map(p => p.projectId);
+    const ids = projects.map((p) => p.projectId);
 
-    const idOwnerMap = projects.reduce((acc, project) => {
-      acc[project.projectId] = project.owner;
-      return acc;
-    }
-    , {} as Record<number, string>);
+    const idOwnerMap = projects.reduce(
+      (acc, project) => {
+        acc[project.projectId] = project.owner;
 
-    const idNameMap = projects.reduce((acc, project) => {
-      acc[project.projectId] = project.name;
-      return acc;
-    }
-    , {} as Record<number, string>);
+        return acc;
+      },
+      {} as Record<number, string>,
+    );
+
+    const idNameMap = projects.reduce(
+      (acc, project) => {
+        acc[project.projectId] = project.name;
+
+        return acc;
+      },
+      {} as Record<number, string>,
+    );
 
     if (sql) {
       const sqlIds = sql.map((p: Record<string, any>) => p.project);
-      const missingIds = ids.filter(id => !sqlIds.includes(id));
+      const missingIds = ids.filter((id) => !sqlIds.includes(id));
 
       if (missingIds.length) {
         const db = neon(POSTGRES_URL);
-        db.transaction(missingIds.map(id => db(`INSERT INTO ${TABLE_NAME} (project, owner, name, contributors, validators) VALUES ($1, $2, $3, $4, $5)`, [id, idOwnerMap[id], idNameMap[id], "", ""])))
-          .then((...data) => console.log('insertions complete', data))
-          .catch((e) => console.error('insertions failed', e));
-        
+
+        db.transaction(
+          missingIds.map((id) =>
+            db(
+              `INSERT INTO ${TABLE_NAME} (project, owner, name, contributors, validators) VALUES ($1, $2, $3, $4, $5)`,
+              [id, idOwnerMap[id], idNameMap[id], "", ""],
+            ),
+          ),
+        )
+          .then((...data) => console.log("insertions complete", data))
+          .catch((e) => console.error("insertions failed", e));
+
         // missingIds.map(async (id) => {
         //   sql(`INSERT INTO projects (project, owner, contributors, validators) VALUES ($1, $2, $3, $4)`, [id, "0x1", "0x2,0x3", "0x4"]);
         // });
@@ -161,17 +205,15 @@ export default function BaseTable(props: { onCreateNew: () => void; onStartProje
 
     // const sqlIds = (sql || []).map((p: Record<string, any>) => p.project);
 
-
-
-
     // await sql(`INSERT INTO ${TABLE_NAME} (project, owner, contributors, validators) VALUES ($1, $2, $3, $4)`, [1, "0x1", "0x2,0x3", "0x4"]);
 
     // create a row for each project id that is not in the database
-
-  }, [projects.map(p => p.projectId).join(','), sql]);
+  }, [projects.map((p) => p.projectId).join(","), sql]);
 
   const [filterValue, setFilterValue] = React.useState("");
-  const [selectedKeys, setSelectedKeys] = React.useState<Selection>(new Set([]));
+  const [selectedKeys, setSelectedKeys] = React.useState<Selection>(
+    new Set([]),
+  );
   const [visibleColumns, setVisibleColumns] = React.useState<Selection>(
     new Set(INITIAL_VISIBLE_COLUMNS),
   );
@@ -191,7 +233,9 @@ export default function BaseTable(props: { onCreateNew: () => void; onStartProje
   const headerColumns = React.useMemo(() => {
     if (visibleColumns === "all") return columns;
 
-    return columns.filter((column) => Array.from(visibleColumns).includes(column.uid));
+    return columns.filter((column) =>
+      Array.from(visibleColumns).includes(column.uid),
+    );
   }, [visibleColumns]);
 
   const filteredItems = React.useMemo(() => {
@@ -204,7 +248,9 @@ export default function BaseTable(props: { onCreateNew: () => void; onStartProje
     }
 
     if (ownerFilter) {
-      filteredUsers = filteredUsers.filter((user) => user.owner === account.address);
+      filteredUsers = filteredUsers.filter(
+        (user) => user.owner === account.address,
+      );
     }
     // if (statusFilter !== "all" && Array.from(statusFilter).length !== statusOptions.length) {
     //   filteredUsers = filteredUsers.filter((user) =>
@@ -218,7 +264,6 @@ export default function BaseTable(props: { onCreateNew: () => void; onStartProje
       currentAddress: account.address,
     }));
   }, [projects, filterValue, statusFilter, ownerFilter, account.address]);
-
 
   const pages = Math.max(Math.ceil(filteredItems.length / rowsPerPage), 1);
 
@@ -245,84 +290,141 @@ export default function BaseTable(props: { onCreateNew: () => void; onStartProje
     });
   }, [sortDescriptor, items, account.address]);
 
-  const renderCell = useCallback((user: User & { isOwner: boolean; currentAddress: string }, columnKey: React.Key) => {
-    const cellValue = user[columnKey as keyof User];
+  const renderCell = useCallback(
+    (
+      user: User & { isOwner: boolean; currentAddress: string },
+      columnKey: React.Key,
+    ) => {
+      const cellValue = user[columnKey as keyof User];
 
-    switch (columnKey) {
-      case "numValidators":
-      case "numContributors":
-      // case "totalScore":
-        return <Tooltip delay={1} isDisabled={cellValue === 0} content={
-          <Scrollable projectId={user.projectId} num={cellValue as number} fn={columnKey === 'numContributors' ? 'getContributor' : 'getValidator'} />
-        } className="text-center">{cellValue as number}</Tooltip>;
-      case "owner":
-        return (
-          <WalletUser key={'project-display' + '-' + user.projectId + '-' + user.owner} address={user.owner} />
-        );
-      // case "role":
-      //   return (
-      //     <div className="flex flex-col">
-      //       <p className="text-bold text-small capitalize">{cellValue}</p>
-      //       <p className="text-bold text-tiny capitalize text-default-500">{user.team}</p>
-      //     </div>
-      //   );
-      case "active":
-        // TODO: Support finished state
-        return (
-          <Chip
-            className="capitalize border-none gap-1 text-default-600"
-            color={user.active ? "success" : "warning"}
-            size="sm"
-            variant="dot"
-          >
-            {user.active ? "active" : "not started"}
-          </Chip>
-        );
-      case "actions":
-        return (
-          <div className="relative flex justify-end items-center gap-2">
-            <Dropdown className="bg-background border-1 border-default-200">
-              <DropdownTrigger>
-                <Button isIconOnly radius="full" size="sm" variant="light">
-                  <VerticalDotsIcon className="text-default-400" />
-                </Button>
-              </DropdownTrigger>
-              <DropdownMenu>
-                {/* <DropdownItem key={"addr"}>{user.currentAddress}</DropdownItem> */}
-                {(user.isOwner && canStartProject(user)) ? <DropdownItem onPress={() => props.onStartProject(user.projectId)} key="start">Start Project</DropdownItem> : <></>}
-                {!user.isOwner ? <DropdownItem key="view" onPress={() => {
-                  // const db = neon(POSTGRES_URL);
-
-                  if (user.currentAddress) {
-                    appendContributors(user.projectId, user.currentAddress);
-                    alert('Contributor request sent');
+      switch (columnKey) {
+        case "numValidators":
+        case "numContributors":
+          // case "totalScore":
+          return (
+            <Tooltip
+              className="text-center"
+              content={
+                <Scrollable
+                  fn={
+                    columnKey === "numContributors"
+                      ? "getContributor"
+                      : "getValidator"
                   }
+                  num={cellValue as number}
+                  projectId={user.projectId}
+                />
+              }
+              delay={1}
+              isDisabled={cellValue === 0}
+            >
+              {cellValue as number}
+            </Tooltip>
+          );
+        case "owner":
+          return (
+            <WalletUser
+              key={"project-display" + "-" + user.projectId + "-" + user.owner}
+              address={user.owner}
+            />
+          );
+        // case "role":
+        //   return (
+        //     <div className="flex flex-col">
+        //       <p className="text-bold text-small capitalize">{cellValue}</p>
+        //       <p className="text-bold text-tiny capitalize text-default-500">{user.team}</p>
+        //     </div>
+        //   );
+        case "active":
+          // TODO: Support finished state
+          return (
+            <Chip
+              className="capitalize border-none gap-1 text-default-600"
+              color={user.active ? "success" : "warning"}
+              size="sm"
+              variant="dot"
+            >
+              {user.active ? "active" : "not started"}
+            </Chip>
+          );
+        case "actions":
+          return (
+            <div className="relative flex justify-end items-center gap-2">
+              <Dropdown className="bg-background border-1 border-default-200">
+                <DropdownTrigger>
+                  <Button isIconOnly radius="full" size="sm" variant="light">
+                    <VerticalDotsIcon className="text-default-400" />
+                  </Button>
+                </DropdownTrigger>
+                <DropdownMenu>
+                  {/* <DropdownItem key={"addr"}>{user.currentAddress}</DropdownItem> */}
+                  {user.isOwner && canStartProject(user) ? (
+                    <DropdownItem
+                      key="start"
+                      onPress={() => props.onStartProject(user.projectId)}
+                    >
+                      Start Project
+                    </DropdownItem>
+                  ) : (
+                    <></>
+                  )}
+                  {!user.isOwner ? (
+                    <DropdownItem
+                      key="view"
+                      onPress={() => {
+                        // const db = neon(POSTGRES_URL);
 
-                }}>Join as contributor</DropdownItem> : <></>}
-                {!user.isOwner ? <DropdownItem key="edit" onPress={() => {
+                        if (user.currentAddress) {
+                          appendContributors(
+                            user.projectId,
+                            user.currentAddress,
+                          );
+                          alert("Contributor request sent");
+                        }
+                      }}
+                    >
+                      Join as contributor
+                    </DropdownItem>
+                  ) : (
+                    <></>
+                  )}
+                  {!user.isOwner ? (
+                    <DropdownItem
+                      key="edit"
+                      onPress={() => {
+                        if (user.currentAddress) {
+                          appendValidators(user.projectId, user.currentAddress);
+                          alert("Contributor request sent");
+                        }
 
-                if (user.currentAddress) {
-                  appendValidators(user.projectId, user.currentAddress);
-                  alert('Contributor request sent');
-                }
+                        alert("Validator request sent");
+                      }}
+                    >
+                      Join as validator
+                    </DropdownItem>
+                  ) : (
+                    <></>
+                  )}
+                  {/* <DropdownItem key="delete">Delete</DropdownItem> */}
+                </DropdownMenu>
+              </Dropdown>
+            </div>
+          );
+        default:
+          // TODO: Remve this misleading typecasting
+          return cellValue as string | number | boolean;
+      }
+    },
+    [],
+  );
 
-                  alert('Validator request sent');
-                }}>Join as validator</DropdownItem> : <></>}
-                {/* <DropdownItem key="delete">Delete</DropdownItem> */}
-              </DropdownMenu>
-            </Dropdown>
-          </div>
-        );
-      default:
-        // TODO: Remve this misleading typecasting
-        return cellValue as string | number | boolean;
-    }
-  }, []);
-
-  const onRowsPerPageChange = React.useCallback((e: React.ChangeEvent<HTMLSelectElement>) => {
-    setRowsPerPage(Number(e.target.value));
-    setPage(1);
-  }, []);
+  const onRowsPerPageChange = React.useCallback(
+    (e: React.ChangeEvent<HTMLSelectElement>) => {
+      setRowsPerPage(Number(e.target.value));
+      setPage(1);
+    },
+    [],
+  );
 
   const onSearchChange = React.useCallback((value?: string) => {
     if (value) {
@@ -341,8 +443,6 @@ export default function BaseTable(props: { onCreateNew: () => void; onStartProje
   //     setOwnerFilter(value);
   //   }
   // });
-
-
 
   const topContent = React.useMemo(() => {
     return (
@@ -432,13 +532,20 @@ export default function BaseTable(props: { onCreateNew: () => void; onStartProje
                 ))}
               </DropdownMenu>
             </Dropdown>
-            <Button className="bg-foreground text-background" endContent={<PlusIcon />} size="sm" onPress={props.onCreateNew}>
+            <Button
+              className="bg-foreground text-background"
+              endContent={<PlusIcon />}
+              size="sm"
+              onPress={props.onCreateNew}
+            >
               Add New
             </Button>
           </div>
         </div>
         <div className="flex justify-between items-center">
-          <span className="text-default-400 text-small">Total {filteredItems.length} projects</span>
+          <span className="text-default-400 text-small">
+            Total {filteredItems.length} projects
+          </span>
           <label className="flex items-center text-default-400 text-small">
             Rows per page:
             <select
@@ -511,23 +618,24 @@ export default function BaseTable(props: { onCreateNew: () => void; onStartProje
   return (
     <Table
       // isCompact
+      hoverable
       removeWrapper
       aria-label="Example table with custom cells, pagination and sorting"
       bottomContent={
         <div className="py-2 px-2 flex justify-between items-center">
-        <Pagination
-          showControls
-          classNames={{
-            cursor: "bg-foreground text-background",
-          }}
-          color="default"
-          isDisabled={hasSearchFilter}
-          page={page}
-          total={pages}
-          variant="light"
-          onChange={setPage}
-        />
-      </div>
+          <Pagination
+            showControls
+            classNames={{
+              cursor: "bg-foreground text-background",
+            }}
+            color="default"
+            isDisabled={hasSearchFilter}
+            page={page}
+            total={pages}
+            variant="light"
+            onChange={setPage}
+          />
+        </div>
       }
       bottomContentPlacement="outside"
       checkboxesProps={{
@@ -537,7 +645,6 @@ export default function BaseTable(props: { onCreateNew: () => void; onStartProje
       }}
       classNames={classNames}
       selectedKeys={selectedKeys}
-      hoverable
       selectionMode="single"
       // TODO: Fix error resulting from multiple instances of the types library being present
       // @ts-ignore
@@ -561,7 +668,9 @@ export default function BaseTable(props: { onCreateNew: () => void; onStartProje
       <TableBody emptyContent={"No projects found"} items={sortedItems}>
         {(item) => (
           <TableRow key={item.projectId}>
-            {(columnKey) => <TableCell>{renderCell(item as any, columnKey)}</TableCell>}
+            {(columnKey) => (
+              <TableCell>{renderCell(item as any, columnKey)}</TableCell>
+            )}
           </TableRow>
         )}
       </TableBody>
@@ -577,15 +686,28 @@ export function ProjectTableWithStartModal() {
   return (
     <>
       <CreateContractModal isOpen={isOpen} onClose={onClose} />
-      
-      <BaseTable onCreateNew={onOpen} onStartProject={_projectId => {
-        setProjectId(_projectId);
-        startFormModal.onOpen();
-      }} />
 
-      <Modal hideCloseButton backdrop={"blur"} isOpen={startFormModal.isOpen} onClose={startFormModal.onClose}>
-        <ModalContent >
-          {typeof projectId === 'number' ? <StartProjectForm onClose={startFormModal.onClose} projectId={projectId} /> : undefined}
+      <BaseTable
+        onCreateNew={onOpen}
+        onStartProject={(_projectId) => {
+          setProjectId(_projectId);
+          startFormModal.onOpen();
+        }}
+      />
+
+      <Modal
+        hideCloseButton
+        backdrop={"blur"}
+        isOpen={startFormModal.isOpen}
+        onClose={startFormModal.onClose}
+      >
+        <ModalContent>
+          {typeof projectId === "number" ? (
+            <StartProjectForm
+              projectId={projectId}
+              onClose={startFormModal.onClose}
+            />
+          ) : undefined}
         </ModalContent>
       </Modal>
     </>

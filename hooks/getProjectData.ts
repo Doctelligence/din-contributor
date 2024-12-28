@@ -1,10 +1,10 @@
-import { useEffect, useMemo } from 'react';
-import { useReadContract, useReadContracts } from 'wagmi';
+import { useEffect, useMemo } from "react";
+import { useReadContract, useReadContracts } from "wagmi";
+
 import abi from "@/contract/abi";
 import { CONTRACT_ADDRESS } from "@/contract/config";
-import { toProject, projectInfo, projectInfoToSensibleTypes } from '@/utils/project';
-import { useWatchContractEvent } from 'wagmi';
-import { LIVE_UPDATE } from '@/config/site';
+import { projectInfo, projectInfoToSensibleTypes } from "@/utils/project";
+import { LIVE_UPDATE } from "@/config/site";
 
 // TODO: Add events to the chain to make it easier
 // to live update this
@@ -12,7 +12,7 @@ export function useGetProjectCount() {
   const { data: projectCount, refetch } = useReadContract({
     address: CONTRACT_ADDRESS,
     abi,
-    functionName: 'projectCount',
+    functionName: "projectCount",
   });
 
   // TODO: Use events rather than polling
@@ -41,14 +41,15 @@ export function useGetProjectCount() {
 export function useGetProjectData() {
   const projectCount = useGetProjectCount();
   const contracts = useMemo(
-    () => new Array(projectCount || 0)
-      .fill(undefined)
-      .map((_, i) => ({
+    () =>
+      new Array(projectCount || 0).fill(undefined).map((_, i) => ({
         abi,
         address: CONTRACT_ADDRESS as `0x${string}`,
-        functionName: 'projectInfo' as const,
+        functionName: "projectInfo" as const,
         args: [i],
-      })), [projectCount]);
+      })),
+    [projectCount],
+  );
   const { data: projects, refetch } = useReadContracts({ contracts });
 
   // TODO: Use events rather than polling
@@ -63,10 +64,14 @@ export function useGetProjectData() {
 
   // FUTURE: Improve error handling behavior
   return useMemo(
-    () => projects && projects.every((p) => p.status === 'success')
-      ? projects.map((p, i) => projectInfoToSensibleTypes(projectInfo(p.result), i))
-      : undefined
-    , [projects?.length]);
+    () =>
+      projects && projects.every((p) => p.status === "success")
+        ? projects.map((p, i) =>
+            projectInfoToSensibleTypes(projectInfo(p.result), i),
+          )
+        : undefined,
+    [projects?.length],
+  );
 }
 
 // FUTURE: Query this in a more optimized way the the events
@@ -76,8 +81,7 @@ export function useGetProjectDataByOwner(owner: `0x${string}`) {
 
   // FUTURE: Improve error handling behavior
   return useMemo(
-    () => projects
-      ? projects.filter((p) => p.owner === owner)
-      : undefined
-    , [projects]);
+    () => (projects ? projects.filter((p) => p.owner === owner) : undefined),
+    [projects],
+  );
 }

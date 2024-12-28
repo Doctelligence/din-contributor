@@ -1,7 +1,7 @@
-import { useWriteContract } from 'wagmi';
-import { CONTRACT_ADDRESS, MOCK_ERC20_ADDRESS } from '@/contract/config';
-import abi from '@/contract/abi';
-import { StartProjectArgs, toStartProject } from '@/utils/project'
+import { useWriteContract } from "wagmi";
+
+import { CONTRACT_ADDRESS } from "@/contract/config";
+import abi from "@/contract/abi";
 
 // export const useAddContributors = () => {
 //   const { writeContract, ...args } = useWriteContract();
@@ -40,12 +40,16 @@ export const useAddValidatorsOrContributors = () => {
   const { writeContract, ...args } = useWriteContract();
 
   return {
-    add: (value: 'Contributors' | 'Validators', args: readonly [bigint, readonly `0x${string}`[]]) => {
+    add: (
+      value: "Contributors" | "Validators",
+      args: readonly [bigint, readonly `0x${string}`[]],
+    ) => {
       return writeContract({
         address: CONTRACT_ADDRESS,
         abi,
         args,
-        functionName: value === 'Contributors' ? 'addContributors' : 'addValidators',
+        functionName:
+          value === "Contributors" ? "addContributors" : "addValidators",
       });
     },
     ...args,

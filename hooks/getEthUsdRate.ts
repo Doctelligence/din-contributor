@@ -1,9 +1,10 @@
 "use client";
 
+import { useMemo } from "react";
+import { useReadContract } from "wagmi";
+
 import { CONVERSION_ADDRESS_ETH_USD, mainnetConfig } from "@/contract/config";
 import ethabi from "@/contract/ethabi";
-import { useMemo } from "react";
-import { useReadContract, createStorage } from 'wagmi';
 
 let lastUpdate: number | undefined = undefined;
 let lastValue = undefined;
@@ -16,9 +17,9 @@ export function useGetEthUsdRate() {
   const { data, ...args } = useReadContract({
     abi: ethabi,
     address: CONVERSION_ADDRESS_ETH_USD,
-    config: { 
-      ...mainnetConfig, 
-      cacheTime: 300000, 
+    config: {
+      ...mainnetConfig,
+      cacheTime: 300000,
       // storage, // Cache for 5 minutes and use localStorage
     },
     functionName: "latestRoundData",
@@ -31,5 +32,5 @@ export function useGetEthUsdRate() {
   // Log storage content to check if caching is working
   // console.log('Storage content:', JSON.stringify(localStorage.getItem('wagmi.store'), null, 2));
 
-  return data ? (Math.round(Number(data[1]) / 1e6) / 1e2) : undefined;
+  return data ? Math.round(Number(data[1]) / 1e6) / 1e2 : undefined;
 }

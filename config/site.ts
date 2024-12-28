@@ -20,8 +20,7 @@ export const siteConfig = {
       href: "https://validator.doctelligence.com",
     },
   ],
-  navMenuItems: [
-  ] as { label: string; href: string }[],
+  navMenuItems: [] as { label: string; href: string }[],
   links: {
     github: "https://github.com/Doctelligence",
     twitter: "https://x.com/doctelligence",

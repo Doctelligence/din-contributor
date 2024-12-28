@@ -1,16 +1,9 @@
 "use client";
 
 import { Button } from "@nextui-org/button";
-import {  } from "@nextui-org/shared-icons";
+import {} from "@nextui-org/shared-icons";
 
-import {
-  HeartFilledIcon,
-  PlugIcon,
-} from "@/components/icons";
-import { CONTRACT_ADDRESS } from "@/contract/config";
-import abi from "@/contract/abi";
-import { useAccount, useReadContract, useConnect } from "wagmi";
-import { Code } from "@nextui-org/code";
+import { useAccount, useConnect } from "wagmi";
 
 export const ConnectWallet = () => {
   const { address, isConnected } = useAccount();
@@ -19,8 +12,8 @@ export const ConnectWallet = () => {
   if (isConnected) {
     return (
       <Button
-        color="success"
         className="flex items-center gap-1"
+        color="success"
         isDisabled={true}
       >
         <span>Connected to {address}</span>
@@ -30,8 +23,8 @@ export const ConnectWallet = () => {
 
   return (
     <Button
-      color="primary"
       className="flex items-center gap-1"
+      color="primary"
       isDisabled={isPending || isSuccess}
       onClick={() => connect({ connector: connectors[0] })}
     >

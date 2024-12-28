@@ -1,16 +1,10 @@
 "use client";
 
 import React, { useEffect } from "react";
-import {
-  Modal,
-  ModalContent,
-  ModalHeader,
-  ModalBody,
-  ModalFooter,
-  useDisclosure,
-} from "@nextui-org/modal";
+import { Modal, ModalContent, useDisclosure } from "@nextui-org/modal";
 import { Button } from "@nextui-org/button";
 import { Spinner } from "@nextui-org/spinner";
+
 import { useCreateRewardToken } from "@/hooks/createRewardToken";
 
 export function CreateTokenModal() {
@@ -27,7 +21,7 @@ export function CreateTokenModal() {
   useEffect(() => {
     if (isOpen && status !== "pending") {
       onClose();
-      if (status === 'success') {
+      if (status === "success") {
         // console.log({status, data});
       }
     }
@@ -52,12 +46,21 @@ export function CreateTokenModal() {
           </Button>
         ))}
       </div>
-      <Modal backdrop={"blur"} isOpen={isOpen} hideCloseButton className="bg-opacity-0 border-opacity-0">
+      <Modal
+        hideCloseButton
+        backdrop={"blur"}
+        className="bg-opacity-0 border-opacity-0"
+        isOpen={isOpen}
+      >
         <ModalContent className="bg-opacity-0 border-opacity-0">
           {(onClose) => (
             <>
               {/* <ModalBody> */}
-                <Spinner color="warning" label="Creating Token ..." className="bg-opacity-0 border-opacity-0" />
+              <Spinner
+                className="bg-opacity-0 border-opacity-0"
+                color="warning"
+                label="Creating Token ..."
+              />
               {/* </ModalBody> */}
             </>
           )}

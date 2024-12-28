@@ -1,23 +1,17 @@
-'use client';
+"use client";
 
-import { Button } from "@nextui-org/button";
-import { useMemo } from "react";
-import {
-  HeartFilledIcon
-} from "@/components/icons";
-import { CONTRACT_ADDRESS } from "@/contract/config";
-import abi from "@/contract/abi";
-import { useAccount, useReadContract, useWriteContract,  } from "wagmi";
-import { Code } from "@nextui-org/code";
-
+import { useReadContract } from "wagmi";
 import {
   Table,
   TableHeader,
   TableBody,
   TableColumn,
   TableRow,
-  TableCell
+  TableCell,
 } from "@nextui-org/table";
+
+import { CONTRACT_ADDRESS } from "@/contract/config";
+import abi from "@/contract/abi";
 
 export const ProjectRow = ({ index }: { index: number }) => {
   // const { data: project, ...args } = useReadContract({
@@ -31,9 +25,9 @@ export const ProjectRow = ({ index }: { index: number }) => {
 
   const project = {
     active: true,
-    name: 'Test Project',
-    owner: '0x1234567890',
-    rewardToken: '0x1234567890',
+    name: "Test Project",
+    owner: "0x1234567890",
+    rewardToken: "0x1234567890",
     contributorRewardAmount: 100,
     validatorRewardAmount: 100,
     validationCommitmentDeadline: 100,
@@ -48,26 +42,25 @@ export const ProjectRow = ({ index }: { index: number }) => {
     <TableRow key={index} tabIndex={index}>
       <TableCell>{project.name}</TableCell>
       <TableCell>{project.owner}</TableCell>
-      <TableCell>{project.active ? 'Active' : 'Inactive'}</TableCell>
+      <TableCell>{project.active ? "Active" : "Inactive"}</TableCell>
     </TableRow>
   );
 };
 
 export const ProjectTable = () => {
-
   const { data: projectCount, ...args } = useReadContract({
     address: CONTRACT_ADDRESS,
     abi,
-    functionName: 'projectCount',
+    functionName: "projectCount",
   });
 
   // console.log('PROJECT COUNT', projectCount, args);
 
   const project = {
     active: true,
-    name: 'Test Project',
-    owner: '0x1234567890',
-    rewardToken: '0x1234567890',
+    name: "Test Project",
+    owner: "0x1234567890",
+    rewardToken: "0x1234567890",
     contributorRewardAmount: 100,
     validatorRewardAmount: 100,
     validationCommitmentDeadline: 100,
@@ -77,7 +70,6 @@ export const ProjectTable = () => {
     totalScore: 100,
     totalSuccessfulValidations: 100,
   };
-
 
   return (
     <Table aria-label="Example static collection table">
