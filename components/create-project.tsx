@@ -13,7 +13,7 @@ import { CONTRACT_ADDRESS } from "@/contract/config";
 import abi from "@/contract/abi";
 
 export function CreateContractButton(props: { onStart: () => void }) {
-  const { writeContractAsync } = useWriteContract();
+  const { writeContractAsync, ...args } = useWriteContract();
   const [isLoading, setLoading] = useState(false);
   const [projectName, setProjectName] = useState("");
 
@@ -29,16 +29,20 @@ export function CreateContractButton(props: { onStart: () => void }) {
       functionName: "createProject",
       args: [projectName],
     })
+    .then(() => {
+      setProjectName("");
+      setLoading(false);
+      props.onStart();
+    })
       .catch((error) => {
-        console.error(error);
-        throw error;
-      })
-      .finally(() => {
-        setProjectName("");
+        alert("Error creating project: " + error.message);
         setLoading(false);
-        props.onStart();
+        // console.error(error);
+        // throw error;
       });
   }, [writeContractAsync, projectName]);
+
+  console.log('use write contract args', args);
 
   return (
     <>

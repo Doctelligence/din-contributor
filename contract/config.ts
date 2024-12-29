@@ -16,6 +16,7 @@ export const config = createConfig({
   ],
   transports: {
     [sepolia.id]: http(),
+    // [sepolia.id]: http("http://127.0.0.1:8545/"),
     [mainnet.id]: http(),
   },
   // storage: createStorage({
@@ -53,6 +54,8 @@ export const mainnetConfig = createConfig({
 // export const CONTRACT_ADDRESS = '0xe44706D243C504aF2383B2eF97Fb63e32C6C4679';
 export const CONTRACT_ADDRESS = "0x6F97A6e9340Ec6D472c4aDfCb3aB85a7F9736a38";
 export const MOCK_ERC20_ADDRESS = "0x6Db84FE80F00D243bF56cEB459A28a46E7210aef";
+// export const CONTRACT_ADDRESS = "0x83Db5621D40B8F6FC78A328311596F71b82466fc";
+// export const MOCK_ERC20_ADDRESS = "0xDfb40BFAa626b3ACD177aCfc3122DD42aD962E9D";
 export const CONVERSION_ADDRESS_BTC_USD =
   "0xF4030086522a5bEEa4988F8cA5B36dbC97BeE88c";
 export const CONVERSION_ADDRESS_ETH_USD =
