@@ -111,10 +111,10 @@ export const StartProjectForm = (props: ProjectFormProps) => {
               contributorRewardAmount: BigInt(contributorAmount * 1e18),
               validationRewardAmount: BigInt(validatorAmount * 1e18),
               validationCommitmentDeadline: BigInt(
-                contributorDeadline.toDate("utc").valueOf(),
+                Math.ceil(contributorDeadline.toDate("utc").valueOf() / 1000),
               ),
               validationRevealDeadline: BigInt(
-                validatorDeadline.toDate("utc").valueOf(),
+                Math.ceil(validatorDeadline.toDate("utc").valueOf() / 1000),
               ),
               projectId: BigInt(props.projectId),
             });
