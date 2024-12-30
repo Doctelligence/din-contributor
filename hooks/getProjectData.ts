@@ -73,10 +73,12 @@ export function useGetProjectData() {
     [projectCount, account.address],
   );
   const { data: projects, refetch } = useReadContracts({ contracts });
-  const { data: isContributorData, refetch: contribRefetch } = useReadContracts({ contracts: isContributor });
-  const { data: isValidatorData, refetch: validatorRefetch } = useReadContracts({ contracts: isValidator });
-
-
+  const { data: isContributorData, refetch: contribRefetch } = useReadContracts(
+    { contracts: isContributor },
+  );
+  const { data: isValidatorData, refetch: validatorRefetch } = useReadContracts(
+    { contracts: isValidator },
+  );
 
   // TODO: Use events rather than polling
   if (LIVE_UPDATE) {
@@ -95,7 +97,18 @@ export function useGetProjectData() {
     () =>
       projects && projects.every((p) => p.status === "success")
         ? projects.map((p, i) =>
-            projectInfoToSensibleTypes(projectInfo(p.result, (isContributorData && isContributorData[i]?.status === 'success') ? isContributorData[i].result : undefined, (isValidatorData && isValidatorData[i]?.status === 'success') ? isValidatorData[i].result : undefined), i),
+            projectInfoToSensibleTypes(
+              projectInfo(
+                p.result,
+                isContributorData && isContributorData[i]?.status === "success"
+                  ? isContributorData[i].result
+                  : undefined,
+                isValidatorData && isValidatorData[i]?.status === "success"
+                  ? isValidatorData[i].result
+                  : undefined,
+              ),
+              i,
+            ),
           )
         : undefined,
     [projects, isContributorData, isValidatorData],

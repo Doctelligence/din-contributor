@@ -17,7 +17,12 @@ import { Button } from "@nextui-org/button";
 import { Alert } from "@nextui-org/alert";
 
 import { SQLContext } from "./providers";
-import { clearContributors, clearContributorsOrValidators, clearValidators, sanatise } from "./postgres";
+import {
+  clearContributors,
+  clearContributorsOrValidators,
+  clearValidators,
+  sanatise,
+} from "./postgres";
 
 import { useAddValidatorsOrContributors } from "@/hooks/addContributor";
 import { ProjectTableWithStartModal } from "@/components/table/table";

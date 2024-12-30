@@ -68,12 +68,16 @@ export async function appendContributors(project: number, contributor: string) {
   );
 }
 
-export async function clearContributorsOrValidators(project: number, type: "Contributors" | "Validators") {
+export async function clearContributorsOrValidators(
+  project: number,
+  type: "Contributors" | "Validators",
+) {
   const sql = neon(POSTGRES_URL as string);
 
-  await sql(`UPDATE ${TABLE_NAME} SET ${type.toLowerCase()} = '' WHERE project = $1`, [
-    project,
-  ]);
+  await sql(
+    `UPDATE ${TABLE_NAME} SET ${type.toLowerCase()} = '' WHERE project = $1`,
+    [project],
+  );
 }
 
 export async function clearContributors(project: number) {

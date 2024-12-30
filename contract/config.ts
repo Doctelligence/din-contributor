@@ -29,7 +29,6 @@ export const config = createConfig({
 //   "MockERC20Module#MockERC20": "0x6Db84FE80F00D243bF56cEB459A28a46E7210aef"
 // }
 
-
 export const mainnetConfig = createConfig({
   ssr: true,
   chains: [
@@ -61,7 +60,6 @@ export const mainnetConfig = createConfig({
 //   "DINManagerModule#DINManager": "0x09962c7508fFeE96353C0A6792D92Bb5b305EE9E",
 //   "MockERC20Module#MockERC20": "0x007C02F460f40977C5C40efc6d75Ecf2A3AAA3f3"
 // }
-
 
 // export const CONTRACT_ADDRESS = '0xe44706D243C504aF2383B2eF97Fb63e32C6C4679';
 export const CONTRACT_ADDRESS = "0x09962c7508fFeE96353C0A6792D92Bb5b305EE9E";

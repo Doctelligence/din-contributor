@@ -1,7 +1,7 @@
-import { useContext, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 
 import { useStartProject } from "./startProject";
-import { useMintAndTransfer, useCreateRewardToken } from "./createRewardToken";
+import { useMintAndTransfer } from "./createRewardToken";
 
 import { StartProjectArgs } from "@/utils/project";
 

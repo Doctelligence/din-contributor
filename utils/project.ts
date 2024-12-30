@@ -108,7 +108,9 @@ interface ProjectInfoReturnType {
 }
 
 export function projectInfo(
-  rawResult: ProjectReturnArgs, isContributor?: boolean, isValidator?: boolean,
+  rawResult: ProjectReturnArgs,
+  isContributor?: boolean,
+  isValidator?: boolean,
 ): ProjectInfoReturnType {
   const keys = [
     "owner",

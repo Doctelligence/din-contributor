@@ -7,9 +7,8 @@ import { StartProjectArgs, toStartProject } from "@/utils/project";
 export const useStartProject = () => {
   const { writeContract, ...args } = useWriteContract();
   const { status } = useWaitForTransactionReceipt({
-      hash: args.data
-    });
-  
+    hash: args.data,
+  });
 
   return {
     startProject: (value: StartProjectArgs) => {

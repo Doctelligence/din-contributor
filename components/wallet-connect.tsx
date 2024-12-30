@@ -4,6 +4,7 @@ import { Button } from "@nextui-org/button";
 import {} from "@nextui-org/shared-icons";
 
 import { useAccount, useConnect } from "wagmi";
+
 import { WalletUser } from "./user";
 
 export const ConnectWallet = () => {
@@ -18,7 +19,8 @@ export const ConnectWallet = () => {
         isDisabled={true}
       >
         <span className="flex items-center">
-          Connected as &nbsp;&nbsp;<WalletUser address={address} />
+          Connected as &nbsp;&nbsp;
+          <WalletUser address={address} />
         </span>
       </Button>
     );

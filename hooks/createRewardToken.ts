@@ -1,14 +1,13 @@
 import { useWriteContract, useWaitForTransactionReceipt } from "wagmi";
+import { useEffect, useState } from "react";
 
 import { CONTRACT_ADDRESS, MOCK_ERC20_ADDRESS } from "@/contract/config";
 import erc from "@/contract/ercabi";
-import { useEffect, useState } from "react";
-import { reset } from "viem/actions";
 
 export const useCreateRewardToken = () => {
   const { writeContract, ...args } = useWriteContract();
   const { status } = useWaitForTransactionReceipt({
-    hash: args.data
+    hash: args.data,
   });
 
   return {
@@ -21,14 +20,14 @@ export const useCreateRewardToken = () => {
       });
     },
     ...args,
-    receiptStatus: status
+    receiptStatus: status,
   };
 };
 
 export const useRewardTokenTransfer = () => {
   const { writeContract, ...args } = useWriteContract();
   const { status } = useWaitForTransactionReceipt({
-    hash: args.data
+    hash: args.data,
   });
 
   return {
@@ -41,19 +40,23 @@ export const useRewardTokenTransfer = () => {
       });
     },
     ...args,
-    receiptStatus: status
+    receiptStatus: status,
   };
 };
 
 export const useMintAndTransfer = () => {
   const [value, setValue] = useState<bigint>(BigInt(0));
-  const { createRewardToken, receiptStatus, error  } = useCreateRewardToken();
-  const { rewardTokenTransfer, receiptStatus: tranferReceiptStatus, error: tranferError } = useRewardTokenTransfer();
+  const { createRewardToken, receiptStatus, error } = useCreateRewardToken();
+  const {
+    rewardTokenTransfer,
+    receiptStatus: tranferReceiptStatus,
+    error: tranferError,
+  } = useRewardTokenTransfer();
 
   useEffect(() => {
     if (receiptStatus === "success") {
       rewardTokenTransfer(value);
-    };
+    }
   }, [receiptStatus]);
 
   return {
@@ -66,6 +69,6 @@ export const useMintAndTransfer = () => {
     error: error || tranferError,
     reset() {
       alert("reset called unexpectedly");
-    }
-  }
+    },
+  };
 };
