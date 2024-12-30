@@ -68,7 +68,7 @@ export const useMintAndTransfer = () => {
     receiptStatus: tranferReceiptStatus,
     error: error || tranferError,
     reset() {
-      alert("reset called unexpectedly");
+      // alert("reset called unexpectedly");
     },
   };
 };
