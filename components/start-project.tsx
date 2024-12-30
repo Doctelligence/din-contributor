@@ -4,7 +4,12 @@ import { useEffect, useState } from "react";
 import { Form } from "@nextui-org/form";
 import { Input } from "@nextui-org/input";
 import { DatePicker } from "@nextui-org/date-picker";
-import { getLocalTimeZone, parseDate, today } from "@internationalized/date";
+import {
+  getLocalTimeZone,
+  today,
+  now,
+  parseZonedDateTime,
+} from "@internationalized/date";
 import {
   Modal,
   ModalContent,
@@ -16,6 +21,7 @@ import { Spinner } from "@nextui-org/spinner";
 
 import { useStartProjectWithToken } from "@/hooks/startProjectWithToken";
 import { useExchange } from "@/app/providers";
+import { CONTRIBUTOR_NAME, VALIDATOR_NAME } from "@/config/site";
 
 interface StartProjectForm {
   validationReward: number;
@@ -52,7 +58,7 @@ export const StartProjectForm = (props: ProjectFormProps) => {
   const [contributorAmount, setContributorAmount] = useState(0.001);
   const [validatorAmount, setValidatorAmount] = useState(0.001);
   const [contributorDeadline, setContributorDeadline] = useState(
-    today(getLocalTimeZone()).add({ days: 7 }),
+    now(getLocalTimeZone()).add({ days: 7 }),
   );
   const rate = useExchange();
   // const rate = useGetEthUsdRate();
@@ -99,22 +105,29 @@ export const StartProjectForm = (props: ProjectFormProps) => {
 
           let data = Object.fromEntries(new FormData(e.currentTarget));
 
-          // console.log(e.currentTarget.getAttribute('contributorDeadline'));
+          console.log(data.contributorDeadline, data.validatorDeadline);
 
-          const contributorDeadline = parseDate(
+          const contributorDeadline = parseZonedDateTime(
             data.contributorDeadline as string,
           );
-          const validatorDeadline = parseDate(data.validatorDeadline as string);
+          const validatorDeadline = parseZonedDateTime(
+            data.validatorDeadline as string,
+          );
+
+          // console.log(contributorDeadline, validatorDeadline);
+          // console.log(contributorDeadline.toDate().valueOf() / 1000, validatorDeadline.offset);
+
+          // return;
 
           if (validatorDeadline.compare(contributorDeadline)) {
             startProjectWithToken({
               contributorRewardAmount: BigInt(contributorAmount * 1e18),
               validationRewardAmount: BigInt(validatorAmount * 1e18),
               validationCommitmentDeadline: BigInt(
-                Math.ceil(contributorDeadline.toDate("utc").valueOf() / 1000),
+                Math.ceil(contributorDeadline.toDate().valueOf() / 1000),
               ),
               validationRevealDeadline: BigInt(
-                Math.ceil(validatorDeadline.toDate("utc").valueOf() / 1000),
+                Math.ceil(validatorDeadline.toDate().valueOf() / 1000),
               ),
               projectId: BigInt(props.projectId),
             });
@@ -132,11 +145,11 @@ export const StartProjectForm = (props: ProjectFormProps) => {
                 : ""}
             </span>
           }
-          label="Contribution Reward (ETH)"
+          label={CONTRIBUTOR_NAME + " Reward (ETH)"}
           labelPlacement="outside"
           min={0.001}
           name="contributionReward"
-          placeholder="Enter total validation reward"
+          placeholder={`Enter total ${CONTRIBUTOR_NAME.toLowerCase()} reward`}
           step={0.001}
           type="number"
           value={`${contributorAmount}`}
@@ -149,33 +162,37 @@ export const StartProjectForm = (props: ProjectFormProps) => {
           labelPlacement="outside"
           min={0.001}
           name="validationReward"
-          placeholder="Enter total contribution reward"
+          placeholder={`Enter total ${VALIDATOR_NAME.toLowerCase()} reward`}
           step={0.001}
           type="number"
           value={`${validatorAmount}`}
           onChange={(e) => setValidatorAmount(Number(e.target.value))}
           isRequired
           // errorMessage="Please enter a valid email"
-          label="Validation Reward (ETH)"
+          label={VALIDATOR_NAME + " Reward (ETH)"}
         />
         {/* {rate ? `(conversion rate 1 ETH = $${rate} USD)` : null} */}
         <DatePicker
-          isRequired
-          defaultValue={today(getLocalTimeZone()).add({ days: 7 })}
-          label="Contributor Deadline"
+          showMonthAndYearPickers
+          defaultValue={now(getLocalTimeZone()).add({ days: 7 })}
           labelPlacement="outside"
           minValue={today(getLocalTimeZone())}
           name="contributorDeadline"
           onChange={(e) => e && setContributorDeadline(e)}
+          isRequired
+          // defaultValue={today(getLocalTimeZone()).add({ days: 7 })}
+          label={VALIDATOR_NAME + "Score Commitment Deadline"}
         />
 
         <DatePicker
-          isRequired
-          defaultValue={contributorDeadline.add({ days: 14 })}
-          label="Validator Deadline"
+          showMonthAndYearPickers
+          defaultValue={now(getLocalTimeZone()).add({ days: 14 })}
           labelPlacement="outside"
           minValue={contributorDeadline}
           name="validatorDeadline"
+          isRequired
+          // defaultValue={contributorDeadline.add({ days: 14 })}
+          label={VALIDATOR_NAME + " Score Reveal Deadline"}
         />
 
         <span

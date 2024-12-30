@@ -149,10 +149,10 @@ export function projectInfoToSensibleTypes(
     contributorRewardAmount: Number(project.contributorRewardAmount),
     validatorRewardAmount: Number(project.validatorRewardAmount),
     validationCommitmentDeadline: new Date(
-      Number(project.validationCommitmentDeadline),
+      Number(project.validationCommitmentDeadline) * 1000,
     ),
     validationRevealDeadline: new Date(
-      Number(project.validationRevealDeadline),
+      Number(project.validationRevealDeadline) * 1000,
     ),
     numContributors: Number(project.numContributors),
     numValidators: Number(project.numValidators),

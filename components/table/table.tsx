@@ -86,6 +86,9 @@ export const columns = [
     uid: "numValidators",
     sortable: true,
   },
+
+  { name: "COMMITMENT DEADLINE", uid: "validationCommitmentDeadline" },
+  { name: "REVEAL DEADLINE", uid: "validationRevealDeadline" },
   { name: "STATUS", uid: "active", sortable: true },
   { name: "ACTIONS", uid: "actions" },
   // {name: "ID", uid: "id", sortable: true},
@@ -463,6 +466,14 @@ export default function BaseTable(props: {
               </Dropdown>
             </div>
           );
+        case "validationCommitmentDeadline":
+          return user.active
+            ? (user.validationCommitmentDeadline as Date).toLocaleString()
+            : "NA";
+        case "validationRevealDeadline":
+          return user.active
+            ? (user.validationRevealDeadline as Date).toLocaleString()
+            : "NA";
         default:
           // TODO: Remve this misleading typecasting
           return cellValue as string | number | boolean;
