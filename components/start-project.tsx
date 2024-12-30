@@ -181,7 +181,7 @@ export const StartProjectForm = (props: ProjectFormProps) => {
           onChange={(e) => e && setContributorDeadline(e)}
           isRequired
           // defaultValue={today(getLocalTimeZone()).add({ days: 7 })}
-          label={VALIDATOR_NAME + "Score Commitment Deadline"}
+          label={VALIDATOR_NAME + " Score Commitment Deadline"}
         />
 
         <DatePicker

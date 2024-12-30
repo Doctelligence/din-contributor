@@ -25,7 +25,7 @@ export function OwnerButton({
       variant="flat"
       onPress={() => onChange(!isChecked)}
     >
-      {OWNER_NAME}
+      My Projects
     </Button>
   );
 }
