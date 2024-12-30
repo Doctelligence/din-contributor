@@ -24,8 +24,8 @@ export function toStartProject(
     args.validationRewardAmount,
     args.validationCommitmentDeadline,
     args.validationRevealDeadline,
-  ]
-  console.log(ret)
+  ];
+
   return ret;
 }
 
@@ -103,10 +103,12 @@ interface ProjectInfoReturnType {
   numValidators: ProjectReturnArgs[9];
   totalScore: ProjectReturnArgs[10];
   totalSuccessfulValidations: ProjectReturnArgs[11];
+  isValidator?: boolean | undefined;
+  isContributor?: boolean | undefined;
 }
 
 export function projectInfo(
-  rawResult: ProjectReturnArgs,
+  rawResult: ProjectReturnArgs, isContributor?: boolean, isValidator?: boolean,
 ): ProjectInfoReturnType {
   const keys = [
     "owner",
@@ -128,6 +130,9 @@ export function projectInfo(
   for (let i = 0; i < keys.length; i++) {
     result[keys[i]] = rawResult[i];
   }
+
+  result.isValidator = isValidator;
+  result.isContributor = isContributor;
 
   return result;
 }

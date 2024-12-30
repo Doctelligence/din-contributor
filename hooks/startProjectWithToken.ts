@@ -1,25 +1,27 @@
-import { useEffect, useState } from "react";
+import { useContext, useEffect, useState } from "react";
 
 import { useStartProject } from "./startProject";
-import { useCreateRewardToken } from "./createRewardToken";
+import { useMintAndTransfer, useCreateRewardToken } from "./createRewardToken";
 
 import { StartProjectArgs } from "@/utils/project";
 
 export const useStartProjectWithToken = () => {
   const {
     startProject,
-    status: startProjectStatus,
+    receiptStatus: startProjectStatus,
     reset: resetProject,
     ...startargs
   } = useStartProject();
   const {
     createRewardToken,
-    status: createRewardTokenStatus,
-    data,
+    receiptStatus: createRewardTokenStatus,
+    // data,
     reset,
-    variables,
+    // variables,
     ...args
-  } = useCreateRewardToken();
+  } = useMintAndTransfer();
+  // TODO: Invoke refresh automatically
+  // const projectContext = useContext(Context);
   const [projectArgs, setProjectArgs] =
     useState<Omit<StartProjectArgs, "rewardToken">>();
   const [status, setStatus] = useState<
@@ -27,14 +29,6 @@ export const useStartProjectWithToken = () => {
   >("idle");
 
   useEffect(() => {
-    console.log({
-      createRewardTokenStatus,
-      projectArgs,
-      data,
-      startProjectStatus,
-      startProjectArgs: startargs,
-      createArgs: args,
-    });
     if (createRewardTokenStatus === "success" && projectArgs) {
       reset();
       startProject(projectArgs);

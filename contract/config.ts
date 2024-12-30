@@ -24,6 +24,12 @@ export const config = createConfig({
   // }),
 });
 
+// {
+//   "DINManagerModule#DINManager": "0x6F97A6e9340Ec6D472c4aDfCb3aB85a7F9736a38",
+//   "MockERC20Module#MockERC20": "0x6Db84FE80F00D243bF56cEB459A28a46E7210aef"
+// }
+
+
 export const mainnetConfig = createConfig({
   ssr: true,
   chains: [
@@ -51,9 +57,15 @@ export const mainnetConfig = createConfig({
 // DINManagerModule#DINManager - 0xe44706D243C504aF2383B2eF97Fb63e32C6C4679
 // MockERC20Module#MockERC20 - 0x41C9042Ab6f01CEfdc64021741Bbb36cce5B4584
 
+// {
+//   "DINManagerModule#DINManager": "0x09962c7508fFeE96353C0A6792D92Bb5b305EE9E",
+//   "MockERC20Module#MockERC20": "0x007C02F460f40977C5C40efc6d75Ecf2A3AAA3f3"
+// }
+
+
 // export const CONTRACT_ADDRESS = '0xe44706D243C504aF2383B2eF97Fb63e32C6C4679';
-export const CONTRACT_ADDRESS = "0x6F97A6e9340Ec6D472c4aDfCb3aB85a7F9736a38";
-export const MOCK_ERC20_ADDRESS = "0x6Db84FE80F00D243bF56cEB459A28a46E7210aef";
+export const CONTRACT_ADDRESS = "0x09962c7508fFeE96353C0A6792D92Bb5b305EE9E";
+export const MOCK_ERC20_ADDRESS = "0x007C02F460f40977C5C40efc6d75Ecf2A3AAA3f3";
 // export const CONTRACT_ADDRESS = "0x83Db5621D40B8F6FC78A328311596F71b82466fc";
 // export const MOCK_ERC20_ADDRESS = "0xDfb40BFAa626b3ACD177aCfc3122DD42aD962E9D";
 export const CONVERSION_ADDRESS_BTC_USD =

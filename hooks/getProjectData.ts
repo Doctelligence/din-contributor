@@ -1,5 +1,5 @@
 import { useEffect, useMemo } from "react";
-import { useReadContract, useReadContracts } from "wagmi";
+import { useAccount, useReadContract, useReadContracts } from "wagmi";
 
 import abi from "@/contract/abi";
 import { CONTRACT_ADDRESS } from "@/contract/config";
@@ -40,6 +40,7 @@ export function useGetProjectCount() {
 }
 
 export function useGetProjectData() {
+  const account = useAccount();
   const projectCount = useGetProjectCount();
   const contracts = useMemo(
     () =>
@@ -51,7 +52,31 @@ export function useGetProjectData() {
       })),
     [projectCount],
   );
+  const isContributor = useMemo(
+    () =>
+      new Array(projectCount || 0).fill(undefined).map((_, i) => ({
+        abi,
+        address: CONTRACT_ADDRESS as `0x${string}`,
+        functionName: "isContributor" as const,
+        args: [i, account.address],
+      })),
+    [projectCount, account.address],
+  );
+  const isValidator = useMemo(
+    () =>
+      new Array(projectCount || 0).fill(undefined).map((_, i) => ({
+        abi,
+        address: CONTRACT_ADDRESS as `0x${string}`,
+        functionName: "isValidator" as const,
+        args: [i, account.address],
+      })),
+    [projectCount, account.address],
+  );
   const { data: projects, refetch } = useReadContracts({ contracts });
+  const { data: isContributorData, refetch: contribRefetch } = useReadContracts({ contracts: isContributor });
+  const { data: isValidatorData, refetch: validatorRefetch } = useReadContracts({ contracts: isValidator });
+
+
 
   // TODO: Use events rather than polling
   if (LIVE_UPDATE) {
@@ -59,20 +84,24 @@ export function useGetProjectData() {
     useEffect(() => {
       setInterval(() => {
         refetch();
-      }, 2_500);
+        contribRefetch();
+        validatorRefetch();
+      }, 20_000);
     }, []);
   }
 
   // FUTURE: Improve error handling behavior
-  return useMemo(
+  const allProjects = useMemo(
     () =>
       projects && projects.every((p) => p.status === "success")
         ? projects.map((p, i) =>
-            projectInfoToSensibleTypes(projectInfo(p.result), i),
+            projectInfoToSensibleTypes(projectInfo(p.result, (isContributorData && isContributorData[i]?.status === 'success') ? isContributorData[i].result : undefined, (isValidatorData && isValidatorData[i]?.status === 'success') ? isValidatorData[i].result : undefined), i),
           )
         : undefined,
-    [projects?.length],
+    [projects, isContributorData, isValidatorData],
   );
+
+  return allProjects;
 }
 
 // FUTURE: Query this in a more optimized way the the events

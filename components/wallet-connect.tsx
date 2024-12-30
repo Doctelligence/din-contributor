@@ -4,19 +4,22 @@ import { Button } from "@nextui-org/button";
 import {} from "@nextui-org/shared-icons";
 
 import { useAccount, useConnect } from "wagmi";
+import { WalletUser } from "./user";
 
 export const ConnectWallet = () => {
   const { address, isConnected } = useAccount();
   const { connect, connectors, isPending, isSuccess } = useConnect();
 
-  if (isConnected) {
+  if (isConnected && address) {
     return (
       <Button
-        className="flex items-center gap-1"
+        className="flex items-center gap-1 h-auto p-3 m-3"
         color="success"
         isDisabled={true}
       >
-        <span>Connected to {address}</span>
+        <span className="flex items-center">
+          Connected as &nbsp;&nbsp;<WalletUser address={address} />
+        </span>
       </Button>
     );
   }

@@ -29,11 +29,11 @@ export function CreateContractButton(props: { onStart: () => void }) {
       functionName: "createProject",
       args: [projectName],
     })
-    .then(() => {
-      setProjectName("");
-      setLoading(false);
-      props.onStart();
-    })
+      .then(() => {
+        setProjectName("");
+        setLoading(false);
+        props.onStart();
+      })
       .catch((error) => {
         alert("Error creating project: " + error.message);
         setLoading(false);
@@ -42,7 +42,7 @@ export function CreateContractButton(props: { onStart: () => void }) {
       });
   }, [writeContractAsync, projectName]);
 
-  console.log('use write contract args', args);
+  console.log("use write contract args", args);
 
   return (
     <>

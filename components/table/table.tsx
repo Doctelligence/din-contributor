@@ -21,10 +21,10 @@ import {
   TableRow,
 } from "@nextui-org/table";
 import { User } from "@nextui-org/user";
-import React, { useCallback, useContext, useEffect } from "react";
+import React, { useCallback, useContext, useEffect, useMemo, useState } from "react";
 import { Modal, ModalContent, useDisclosure } from "@nextui-org/modal";
 import { Tooltip } from "@nextui-org/tooltip";
-import { useAccount, useReadContracts } from "wagmi";
+import { useAccount, useReadContracts, useWriteContract } from "wagmi";
 import { neon } from "@neondatabase/serverless";
 
 import { WalletUser, WalletUsersScrollable } from "../user";
@@ -49,7 +49,9 @@ import {
   VerticalDotsIcon,
 } from "@/components/icons";
 import abi from "@/contract/abi";
-import { CONTRACT_ADDRESS } from "@/contract/config";
+import { useGetContributorsOrValidators } from "../../hooks/useGetContributorsOrValidators";
+import { useCommitValidations } from "@/hooks/useCommitValidations";
+import { Spinner } from "@nextui-org/spinner";
 
 type User = ReturnType<typeof projectInfoToSensibleTypes>;
 
@@ -83,9 +85,9 @@ export const columns = [
 ];
 
 export const statusOptions = [
-  { name: "Active", uid: "active" },
-  { name: "Paused", uid: "paused" },
-  { name: "Vacation", uid: "vacation" },
+  { name: "Active", uid: "active", active: true },
+  { name: "Not Started", uid: "inactive", active: false },
+  // { name: "Vacation", uid: "vacation" },
 ];
 
 export function capitalize(s: string) {
@@ -99,7 +101,7 @@ export function capitalize(s: string) {
 // };
 
 const INITIAL_VISIBLE_COLUMNS = [
-  "projectId",
+  // "projectId",
   "owner",
   "name",
   "numContributors",
@@ -117,19 +119,14 @@ const INITIAL_VISIBLE_COLUMNS = [
 
 // }
 
+
+
 export function Scrollable(props: {
   projectId: number;
   num: number;
   fn: "getContributor" | "getValidator";
 }) {
-  const res = useReadContracts({
-    contracts: new Array(props.num).fill(undefined).map((_, i) => ({
-      address: CONTRACT_ADDRESS as `0x${string}`,
-      abi,
-      functionName: props.fn as "getContributor" | "getValidator",
-      args: [BigInt(props.projectId), BigInt(i)],
-    })),
-  });
+  const res = useGetContributorsOrValidators(props);
 
   return (
     <WalletUsersScrollable
@@ -146,7 +143,8 @@ export function Scrollable(props: {
 
 export default function BaseTable(props: {
   onCreateNew: () => void;
-  onStartProject: (projectId: number) => void;
+  onStartProject: (projectId: ReturnType<typeof projectInfoToSensibleTypes>) => void;
+  onSubmitValidation: (projectId: ReturnType<typeof projectInfoToSensibleTypes>) => void;
 }) {
   const projects = useGetProjectData() || [];
   const projectIds = projects.map((p) => p.projectId).join(",");
@@ -175,9 +173,14 @@ export default function BaseTable(props: {
 
     if (sql) {
       const sqlIds = sql.map((p: Record<string, any>) => p.project);
-      const missingIds = ids.filter((id) => !sqlIds.includes(id));
+      const inactiveIds = projects.filter((p) => !p.active).map((p) => p.projectId);
 
-      if (missingIds.length) {
+      const missingIds = inactiveIds.filter((id) => !sqlIds.includes(id));
+      const unwantedIds = sqlIds.filter((id) => !inactiveIds.includes(id));
+
+      // const missingIds = ids.filter((id) => !sqlIds.includes(id));
+
+      if (missingIds.length > 0 || unwantedIds.length > 0) {
         const db = neon(POSTGRES_URL);
 
         db.transaction(
@@ -186,7 +189,9 @@ export default function BaseTable(props: {
               `INSERT INTO ${TABLE_NAME} (project, owner, name, contributors, validators) VALUES ($1, $2, $3, $4, $5)`,
               [id, idOwnerMap[id], idNameMap[id], "", ""],
             ),
-          ),
+          ).concat(
+            db(`DELETE FROM ${TABLE_NAME} WHERE project IN (${unwantedIds.join(",")})`)
+        ),
         )
           .then((...data) => console.log("insertions complete", data))
           .catch((e) => console.error("insertions failed", e));
@@ -252,11 +257,12 @@ export default function BaseTable(props: {
         (user) => user.owner === account.address,
       );
     }
-    // if (statusFilter !== "all" && Array.from(statusFilter).length !== statusOptions.length) {
-    //   filteredUsers = filteredUsers.filter((user) =>
-    //     Array.from(statusFilter).includes(user.status),
-    //   );
-    // }
+    if (statusFilter !== "all" && Array.from(statusFilter).length !== statusOptions.length) {
+      console.log("statusFilter", statusFilter);
+      filteredUsers = filteredUsers.filter((user) =>
+        (statusFilter.has('active') && user.active) || (statusFilter.has('inactive') && !user.active),
+      );
+    }
 
     return filteredUsers.map((user) => ({
       ...user,
@@ -358,19 +364,19 @@ export default function BaseTable(props: {
                 </DropdownTrigger>
                 <DropdownMenu>
                   {/* <DropdownItem key={"addr"}>{user.currentAddress}</DropdownItem> */}
-                  {user.isOwner && canStartProject(user) ? (
+                  {(user.isOwner && !user.active) && canStartProject(user) ? (
                     <DropdownItem
                       key="start"
-                      onPress={() => props.onStartProject(user.projectId)}
+                      onPress={() => props.onStartProject(user)}
                     >
                       Start Project
                     </DropdownItem>
                   ) : (
                     <></>
                   )}
-                  {!user.isOwner ? (
+                  {(!user.isOwner && !user.active && !user.isContributor && !user.isValidator) ? (
                     <DropdownItem
-                      key="view"
+                      key="contribJoin"
                       onPress={() => {
                         // const db = neon(POSTGRES_URL);
 
@@ -388,19 +394,30 @@ export default function BaseTable(props: {
                   ) : (
                     <></>
                   )}
-                  {!user.isOwner ? (
+                  {(!user.isOwner && !user.active && !user.isContributor && !user.isValidator) ? (
                     <DropdownItem
-                      key="edit"
+                      key="valJoin"
                       onPress={() => {
                         if (user.currentAddress) {
                           appendValidators(user.projectId, user.currentAddress);
-                          alert("Contributor request sent");
+                          alert("Validator request sent");
                         }
 
-                        alert("Validator request sent");
+                        // alert("Validator request sent");
                       }}
                     >
                       Join as validator
+                    </DropdownItem>
+                  ) : (
+                    <></>
+                  )}
+                  
+                  {(user.isValidator && user.active) ? (
+                    <DropdownItem
+                      key="submitValidations"
+                      onPress={() => props.onSubmitValidation(user)}
+                    >
+                      Submit Validation Scores
                     </DropdownItem>
                   ) : (
                     <></>
@@ -678,10 +695,121 @@ export default function BaseTable(props: {
   );
 }
 
+const SubmitValidationsForm = (props: { project: ReturnType<typeof projectInfoToSensibleTypes>, onClose: () => void  }) => {
+  const contributors = useGetContributorsOrValidators({
+    projectId: props.project.projectId,
+    fn: "getContributor",
+    num: props.project.numContributors,
+  });
+
+  const loadedContributors = useMemo(() => {
+    return contributors.data?.filter((wallet) => wallet.status === "success")
+      .map((wallet) => wallet.result) || [];
+  }, [contributors.data]);
+
+  const [scoers, setScores] = useState<Record<string, number>>({});
+
+  const { commitValidations, isPending, status, isSuccess, receiptStatus, reset } = useCommitValidations();
+
+  useEffect(() => {
+    setScores({});
+  }, [loadedContributors, props.project]);
+
+  useEffect(() => {
+    if (receiptStatus === 'success') {
+      props.onClose();
+      reset();
+    }
+    if (receiptStatus === 'error' || status === 'error') {
+      alert('Error submitting validations');
+      reset();
+    }
+  }, [status, receiptStatus]);
+
+  console.log(
+    status,
+    receiptStatus,
+  )
+
+  if (isPending || (isSuccess && receiptStatus === 'pending')) {
+    return  <Spinner
+    className="bg-opacity-0 border-opacity-0"
+    color="warning"
+    label="Submitting Validations ..."
+  />;
+  }
+
+  return (
+    <div className="flex flex-col gap-3">
+          <Button isDisabled color="secondary">
+            Submit validations for 
+            <b>{props.project.name}</b>
+          </Button>
+          <Table
+            // disallowEmptySelection
+            aria-label="Example static collection table"
+            color={"primary"}
+            // selectedKeys={keys}
+            selectionMode="none"
+            // onSelectionChange={(keys) => setKeys(keys)}
+            // onChange={(keys) => setKeys(keys)}
+          >
+            <TableHeader>
+              <TableColumn>Wallet</TableColumn>
+              <TableColumn>Score</TableColumn>
+              {/* <TableColumn>ROLE</TableColumn>
+              <TableColumn>STATUS</TableColumn> */}
+            </TableHeader>
+            <TableBody>
+              {loadedContributors?.map((wallet, i) => (
+                <TableRow key={i + wallet}>
+                  <TableCell>
+                    <WalletUser address={wallet as `0x${string}`} />
+                  </TableCell>
+                  <TableCell>
+                    <Input
+                      value={scoers['wallet']?.toString()}
+                      onChange={(e) => {
+                        setScores({
+                          ...scoers,
+                          [wallet]: Number(e.target.value),
+                        });
+                      }}
+                      type="number" min={0} max={100} />
+                  </TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
+          <span className="flex">
+            <Button
+              className="w-full"
+              color="primary"
+              onPress={() => {
+                commitValidations(props.project.projectId, scoers);
+                // console.log(scoers);
+                // props.onClose();
+              }}
+              // isDisabled={isPending || wallets.length === 0}
+              // onPress={() => {
+              //   if (type === "Contributors") clearContributors(projectId);
+              //   else clearValidators(projectId);
+    
+              //   reset();
+              // }}
+            >
+              Submit
+            </Button>
+          </span>
+        </div>
+  );
+};
+
 export function ProjectTableWithStartModal() {
   const { isOpen, onOpen, onClose } = useDisclosure();
   const startFormModal = useDisclosure();
-  const [projectId, setProjectId] = React.useState<number>();
+  const submitValidationsmodal = useDisclosure();
+  const [project, setProject] = React.useState<ReturnType<typeof projectInfoToSensibleTypes>>();
 
   return (
     <>
@@ -689,9 +817,13 @@ export function ProjectTableWithStartModal() {
 
       <BaseTable
         onCreateNew={onOpen}
-        onStartProject={(_projectId) => {
-          setProjectId(_projectId);
+        onStartProject={(_project) => {
+          setProject(_project);
           startFormModal.onOpen();
+        }}
+        onSubmitValidation={(_project) => {
+          setProject(_project);
+          submitValidationsmodal.onOpen();
         }}
       />
 
@@ -702,10 +834,27 @@ export function ProjectTableWithStartModal() {
         onClose={startFormModal.onClose}
       >
         <ModalContent>
-          {typeof projectId === "number" ? (
+          {typeof project?.projectId === "number" ? (
             <StartProjectForm
-              projectId={projectId}
+              projectId={project.projectId}
               onClose={startFormModal.onClose}
+            />
+          ) : undefined}
+        </ModalContent>
+      </Modal>
+
+      <Modal
+        hideCloseButton
+        backdrop={"blur"}
+        isOpen={submitValidationsmodal.isOpen}
+        onClose={submitValidationsmodal.onClose}
+        size="2xl"
+      >
+        <ModalContent>
+          {typeof project?.projectId === "number" ? (
+            <SubmitValidationsForm
+              project={project}
+              onClose={submitValidationsmodal.onClose}
             />
           ) : undefined}
         </ModalContent>

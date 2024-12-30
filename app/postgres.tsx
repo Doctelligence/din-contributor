@@ -49,6 +49,7 @@ export async function update() {
 
 // Append  "hello world" to the current value of the contributors column in the row with the project id of 1
 export async function appendValidators(project: number, validator: string) {
+  console.log("APPEND Validator", project, validator);
   const sql = neon(POSTGRES_URL as string);
 
   await sql(
@@ -58,12 +59,21 @@ export async function appendValidators(project: number, validator: string) {
 }
 
 export async function appendContributors(project: number, contributor: string) {
+  console.log("APPEND Contributor", project, contributor);
   const sql = neon(POSTGRES_URL as string);
 
   await sql(
     `UPDATE ${TABLE_NAME} SET contributors = contributors || $1 WHERE project = $2`,
     [";" + contributor, project],
   );
+}
+
+export async function clearContributorsOrValidators(project: number, type: "Contributors" | "Validators") {
+  const sql = neon(POSTGRES_URL as string);
+
+  await sql(`UPDATE ${TABLE_NAME} SET ${type.toLowerCase()} = '' WHERE project = $1`, [
+    project,
+  ]);
 }
 
 export async function clearContributors(project: number) {

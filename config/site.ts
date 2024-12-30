@@ -1,7 +1,7 @@
 export type SiteConfig = typeof siteConfig;
 
-export const TABLE_VERSIONS = "4";
-export const LIVE_UPDATE = false;
+export const TABLE_VERSIONS = "5";
+export const LIVE_UPDATE = true;
 
 export const siteConfig = {
   name: "Doctelligence Contributor",
@@ -11,14 +11,14 @@ export const siteConfig = {
       label: "Home",
       href: "https://doctelligence.com",
     },
-    {
-      label: "Project Management",
-      href: "https://pm.doctelligence.com",
-    },
-    {
-      label: "Validators",
-      href: "https://validator.doctelligence.com",
-    },
+    // {
+    //   label: "Project Management",
+    //   href: "https://pm.doctelligence.com",
+    // },
+    // {
+    //   label: "Validators",
+    //   href: "https://validator.doctelligence.com",
+    // },
   ],
   navMenuItems: [] as { label: string; href: string }[],
   links: {
