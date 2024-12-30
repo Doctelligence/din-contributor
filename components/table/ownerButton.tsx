@@ -1,6 +1,8 @@
 import { Button } from "@nextui-org/button";
 import { Checkbox } from "@nextui-org/checkbox";
 
+import { OWNER_NAME } from "@/config/site";
+
 export function OwnerButton({
   isChecked,
   onChange,
@@ -23,7 +25,7 @@ export function OwnerButton({
       variant="flat"
       onPress={() => onChange(!isChecked)}
     >
-      Owner
+      {OWNER_NAME}
     </Button>
   );
 }

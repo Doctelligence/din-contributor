@@ -57,6 +57,7 @@ import {
   VerticalDotsIcon,
 } from "@/components/icons";
 import { useCommitValidations } from "@/hooks/useCommitValidations";
+import { CONTRIBUTOR_NAME, OWNER_NAME, VALIDATOR_NAME } from "@/config/site";
 
 type User = ReturnType<typeof projectInfoToSensibleTypes>;
 
@@ -73,10 +74,18 @@ type User = ReturnType<typeof projectInfoToSensibleTypes>;
 
 export const columns = [
   { name: "ID", uid: "projectId", sortable: true },
-  { name: "OWNER", uid: "owner", sortable: true },
-  { name: "NAME", uid: "name", sortable: true },
-  { name: "CONTRIBUTORS", uid: "numContributors", sortable: true },
-  { name: "VALIDATORS", uid: "numValidators", sortable: true },
+  { name: OWNER_NAME.toUpperCase(), uid: "owner", sortable: true },
+  { name: "PROJECT NAME", uid: "name", sortable: true },
+  {
+    name: CONTRIBUTOR_NAME.toUpperCase() + "S",
+    uid: "numContributors",
+    sortable: true,
+  },
+  {
+    name: VALIDATOR_NAME.toUpperCase() + "S",
+    uid: "numValidators",
+    sortable: true,
+  },
   { name: "STATUS", uid: "active", sortable: true },
   { name: "ACTIONS", uid: "actions" },
   // {name: "ID", uid: "id", sortable: true},
@@ -153,7 +162,8 @@ export default function BaseTable(props: {
     projectId: ReturnType<typeof projectInfoToSensibleTypes>,
   ) => void;
 }) {
-  const projects = useGetProjectData() || [];
+  const projectsRaw = useGetProjectData();
+  const projects = projectsRaw || [];
   const projectIds = projects.map((p) => p.projectId).join(",");
   const sql = useContext(SQLContext)[0];
 
@@ -189,23 +199,25 @@ export default function BaseTable(props: {
 
       // const missingIds = ids.filter((id) => !sqlIds.includes(id));
 
-      if (missingIds.length > 0 || unwantedIds.length > 0) {
+      if (missingIds.length > 0 || (projectsRaw && unwantedIds.length > 0)) {
         const db = neon(POSTGRES_URL);
 
-        db.transaction(
-          missingIds
-            .map((id) =>
-              db(
-                `INSERT INTO ${TABLE_NAME} (project, owner, name, contributors, validators) VALUES ($1, $2, $3, $4, $5)`,
-                [id, idOwnerMap[id], idNameMap[id], "", ""],
-              ),
-            )
-            .concat(
-              db(
-                `DELETE FROM ${TABLE_NAME} WHERE project IN (${unwantedIds.join(",")})`,
-              ),
+        const transactions = missingIds.map((id) =>
+          db(
+            `INSERT INTO ${TABLE_NAME} (project, owner, name, contributors, validators) VALUES ($1, $2, $3, $4, $5)`,
+            [id, idOwnerMap[id], idNameMap[id], "", ""],
+          ),
+        );
+
+        if (projectsRaw && unwantedIds.length > 0) {
+          transactions.push(
+            db(
+              `DELETE FROM ${TABLE_NAME} WHERE project IN (${unwantedIds.join(",")})`,
             ),
-        )
+          );
+        }
+
+        db.transaction(transactions)
           .then((...data) => console.log("insertions complete", data))
           .catch((e) => console.error("insertions failed", e));
 
@@ -410,7 +422,7 @@ export default function BaseTable(props: {
                         }
                       }}
                     >
-                      Join as contributor
+                      Join as {CONTRIBUTOR_NAME}
                     </DropdownItem>
                   ) : (
                     <></>
@@ -430,7 +442,7 @@ export default function BaseTable(props: {
                         // alert("Validator request sent");
                       }}
                     >
-                      Join as validator
+                      Join as {VALIDATOR_NAME}
                     </DropdownItem>
                   ) : (
                     <></>
@@ -441,7 +453,7 @@ export default function BaseTable(props: {
                       key="submitValidations"
                       onPress={() => props.onSubmitValidation(user)}
                     >
-                      Submit Validation Scores
+                      Submit {VALIDATOR_NAME} Scores
                     </DropdownItem>
                   ) : (
                     <></>

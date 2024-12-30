@@ -2,6 +2,9 @@ export type SiteConfig = typeof siteConfig;
 
 export const TABLE_VERSIONS = "5";
 export const LIVE_UPDATE = true;
+export const OWNER_NAME = "Model Owner";
+export const VALIDATOR_NAME = "Training Validator";
+export const CONTRIBUTOR_NAME = "Data Contributor";
 
 export const siteConfig = {
   name: "Doctelligence Contributor",
