@@ -58,6 +58,8 @@ import {
 } from "@/components/icons";
 import { useCommitValidations } from "@/hooks/useCommitValidations";
 import { CONTRIBUTOR_NAME, OWNER_NAME, VALIDATOR_NAME } from "@/config/site";
+import { useCollectValidationReward } from "@/hooks/useCollectValidatorReward";
+import { al } from "@upstash/redis/zmscore-Dc6Llqgr";
 
 type User = ReturnType<typeof projectInfoToSensibleTypes>;
 
@@ -101,9 +103,10 @@ export const columns = [
   // {name: "ACTIONS", uid: "actions"},
 ];
 
-export const statusOptions = [
+export const statusOptions: { name: string; uid: ReturnType<typeof projectInfoToSensibleTypes>['status']; active: boolean }[] = [
   { name: "Active", uid: "active", active: true },
-  { name: "Not Started", uid: "inactive", active: false },
+  { name: "Not Started", uid: "not started", active: true },
+  { name: "Completed", uid: "completed", active: false },
   // { name: "Vacation", uid: "vacation" },
 ];
 
@@ -162,6 +165,9 @@ export default function BaseTable(props: {
     projectId: ReturnType<typeof projectInfoToSensibleTypes>,
   ) => void;
   onSubmitValidation: (
+    projectId: ReturnType<typeof projectInfoToSensibleTypes>,
+  ) => void;
+  onCollectValidationReward: (
     projectId: ReturnType<typeof projectInfoToSensibleTypes>,
   ) => void;
 }) {
@@ -250,7 +256,9 @@ export default function BaseTable(props: {
   const [visibleColumns, setVisibleColumns] = React.useState<Selection>(
     new Set(INITIAL_VISIBLE_COLUMNS),
   );
-  const [statusFilter, setStatusFilter] = React.useState<Selection>("all");
+  const [statusFilter, setStatusFilter] = React.useState<Selection>(
+    new Set(statusOptions.filter(status => status.active).map((status) => status.uid)),
+  );
   const [ownerFilter, setOwnerFilter] = React.useState(false);
   // console.log(ownerFilter)
   const [rowsPerPage, setRowsPerPage] = React.useState(5);
@@ -291,9 +299,7 @@ export default function BaseTable(props: {
     ) {
       console.log("statusFilter", statusFilter);
       filteredUsers = filteredUsers.filter(
-        (user) =>
-          (statusFilter.has("active") && user.active) ||
-          (statusFilter.has("inactive") && !user.active),
+        user => statusFilter.has(user.status)
       );
     }
 
@@ -375,15 +381,20 @@ export default function BaseTable(props: {
         //     </div>
         //   );
         case "active":
+          const color = ({
+            active: "success",
+            "not started": "warning",
+            completed: "danger",
+          } as const)[user.status];
           // TODO: Support finished state
           return (
             <Chip
               className="capitalize border-none gap-1 text-default-600"
-              color={user.active ? "success" : "warning"}
+              color={color}
               size="sm"
               variant="dot"
             >
-              {user.active ? "active" : "not started"}
+              {user.status}
             </Chip>
           );
         case "actions":
@@ -397,6 +408,16 @@ export default function BaseTable(props: {
                 </DropdownTrigger>
                 <DropdownMenu>
                   {/* <DropdownItem key={"addr"}>{user.currentAddress}</DropdownItem> */}
+                  {user.isValidator && !user.collectedValidatorReward && user.status === 'completed' ? (
+                    <DropdownItem
+                      key="start"
+                      onPress={() => props.onCollectValidationReward(user)}
+                    >
+                      Collect Validation Reward
+                    </DropdownItem>
+                  ) : (
+                    <></>
+                  )}
                   {user.isOwner && !user.active && canStartProject(user) ? (
                     <DropdownItem
                       key="start"
@@ -451,7 +472,7 @@ export default function BaseTable(props: {
                     <></>
                   )}
 
-                  {user.isValidator && user.active ? (
+                  {user.isValidator && user.active && user.status === 'active' ? (
                     <DropdownItem
                       key="submitValidations"
                       onPress={() => props.onSubmitValidation(user)}
@@ -871,8 +892,25 @@ export function ProjectTableWithStartModal() {
   const { isOpen, onOpen, onClose } = useDisclosure();
   const startFormModal = useDisclosure();
   const submitValidationsmodal = useDisclosure();
+  const rewardCollectionModal = useDisclosure();
+  const collectValidationReward = useCollectValidationReward();
   const [project, setProject] =
     React.useState<ReturnType<typeof projectInfoToSensibleTypes>>();
+
+  useEffect(() => {
+    if (collectValidationReward.status === "success") {
+      rewardCollectionModal.onClose();
+      alert("Reward collected successfully");
+      collectValidationReward.reset();
+      return;
+    }
+    if (collectValidationReward.status === "error") {
+      rewardCollectionModal.onClose();
+      collectValidationReward.reset();
+      alert("Error collecting reward");
+      return;
+    }
+  }, [collectValidationReward.receiptStatus]);
 
   return (
     <>
@@ -887,6 +925,11 @@ export function ProjectTableWithStartModal() {
         onSubmitValidation={(_project) => {
           setProject(_project);
           submitValidationsmodal.onOpen();
+        }}
+        onCollectValidationReward={(_project) => {
+          setProject(_project);
+          rewardCollectionModal.onOpen();
+          collectValidationReward.collectValidationReward(_project.projectId);
         }}
       />
 
@@ -920,6 +963,21 @@ export function ProjectTableWithStartModal() {
               onClose={submitValidationsmodal.onClose}
             />
           ) : undefined}
+        </ModalContent>
+      </Modal>
+
+      <Modal
+        hideCloseButton
+        backdrop={"blur"}
+        isOpen={rewardCollectionModal.isOpen}
+        onClose={rewardCollectionModal.onClose}
+      >
+        <ModalContent>
+          <Spinner
+                          className="bg-opacity-0 border-opacity-0"
+                          color="warning"
+                          label={"Collecting Reward for " + project?.name}
+                        />
         </ModalContent>
       </Modal>
     </>

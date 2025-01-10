@@ -105,12 +105,16 @@ interface ProjectInfoReturnType {
   totalSuccessfulValidations: ProjectReturnArgs[11];
   isValidator?: boolean | undefined;
   isContributor?: boolean | undefined;
+  collectedValidatorReward?: boolean | undefined;
+  collectedContributorReward?: boolean | undefined;
 }
 
 export function projectInfo(
   rawResult: ProjectReturnArgs,
   isContributor?: boolean,
   isValidator?: boolean,
+  collectedValidatorReward?: boolean,
+  collectedContributorReward?: boolean,
 ): ProjectInfoReturnType {
   const keys = [
     "owner",
@@ -135,6 +139,8 @@ export function projectInfo(
 
   result.isValidator = isValidator;
   result.isContributor = isContributor;
+  result.collectedValidatorReward = collectedValidatorReward;
+  result.collectedContributorReward = collectedContributorReward;
 
   return result;
 }
@@ -143,6 +149,15 @@ export function projectInfoToSensibleTypes(
   project: ProjectInfoReturnType,
   projectId: number,
 ) {
+  let status: "not started" | "active" | "completed" = "not started";
+
+  if (project.active) {
+    if ((Number(project.validationRevealDeadline.valueOf()) * 1000) >= Date.now())
+      status = "active";
+    else
+      status = "completed";
+  }
+
   return {
     ...project,
     active: Boolean(project.active),
@@ -159,5 +174,6 @@ export function projectInfoToSensibleTypes(
     totalScore: Number(project.totalScore),
     totalSuccessfulValidations: Number(project.totalSuccessfulValidations),
     projectId,
+    status,
   };
 }

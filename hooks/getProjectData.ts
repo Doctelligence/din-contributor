@@ -72,12 +72,38 @@ export function useGetProjectData() {
       })),
     [projectCount, account.address],
   );
+  const collectedValidatorReward = useMemo(
+    () =>
+      new Array(projectCount || 0).fill(undefined).map((_, i) => ({
+        abi,
+        address: CONTRACT_ADDRESS as `0x${string}`,
+        functionName: "collectedValidatorReward" as const,
+        args: [i, account.address],
+      })),
+    [projectCount, account.address],
+  );
+  const collectedContributorReward = useMemo(
+    () =>
+      new Array(projectCount || 0).fill(undefined).map((_, i) => ({
+        abi,
+        address: CONTRACT_ADDRESS as `0x${string}`,
+        functionName: "collectedContributorReward" as const,
+        args: [i, account.address],
+      })),
+    [projectCount, account.address],
+  );
   const { data: projects, refetch } = useReadContracts({ contracts });
   const { data: isContributorData, refetch: contribRefetch } = useReadContracts(
     { contracts: isContributor },
   );
   const { data: isValidatorData, refetch: validatorRefetch } = useReadContracts(
     { contracts: isValidator },
+  );
+  const { data: collectedValidatorRewardData, refetch: collectedValidatorRewardRefetch } = useReadContracts(
+    { contracts: collectedValidatorReward },
+  );
+  const { data: collectedContributorRewardData, refetch: collectedContributorRewardRefetch } = useReadContracts(
+    { contracts: collectedContributorReward },
   );
 
   // TODO: Use events rather than polling
@@ -88,6 +114,7 @@ export function useGetProjectData() {
         refetch();
         contribRefetch();
         validatorRefetch();
+        collectedValidatorRewardRefetch();
       }, 20_000);
     }, []);
   }
@@ -105,6 +132,12 @@ export function useGetProjectData() {
                   : undefined,
                 isValidatorData && isValidatorData[i]?.status === "success"
                   ? isValidatorData[i].result
+                  : undefined,
+                collectedValidatorRewardData && collectedValidatorRewardData[i]?.status === "success"
+                  ? collectedValidatorRewardData[i].result
+                  : undefined,
+                collectedContributorRewardData && collectedContributorRewardData[i]?.status === "success"
+                  ? collectedContributorRewardData[i].result
                   : undefined,
               ),
               i,
