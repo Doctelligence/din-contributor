@@ -3,6 +3,7 @@ import { toHex, keccak256 } from "viem";
 
 import { CONTRACT_ADDRESS } from "@/contract/config";
 import abi from "@/contract/abi";
+import ethers from 'ethers';
 
 export const useCommitValidations = () => {
   const { writeContract, ...args } = useWriteContract();
@@ -18,7 +19,9 @@ export const useCommitValidations = () => {
       const contributors = Object.keys(scores) as `0x${string}`[];
       // TODO: Check the encoding here
       const scoreNumbers = contributors.map((address) =>
-        keccak256(toHex(scores[address])),
+        keccak256(
+          toHex(ethers.utils.defaultAbiCoder.encode(["bytes32", "uint256"], [address, scores[address]]))
+        ),
       );
 
       return writeContract({
@@ -26,6 +29,32 @@ export const useCommitValidations = () => {
         abi,
         args: [BigInt(projectId), contributors, scoreNumbers],
         functionName: "commitValidations",
+      });
+    },
+    ...args,
+    receiptStatus: status,
+  };
+};
+
+
+export const useRevealValidations = () => {
+  const { writeContract, ...args } = useWriteContract();
+  const { status } = useWaitForTransactionReceipt({
+    hash: args.data,
+  });
+
+  return {
+    revealValidations: (
+      projectId: number,
+      scores: Record<`0x${string}`, number>,
+    ) => {
+      const contributors = Object.keys(scores) as `0x${string}`[];
+ 
+      return writeContract({
+        address: CONTRACT_ADDRESS,
+        abi,
+        args: [BigInt(projectId), contributors, contributors,  contributors.map(elem => BigInt(scores[elem]))],
+        functionName: "revealValidations",
       });
     },
     ...args,
