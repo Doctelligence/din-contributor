@@ -961,14 +961,14 @@ export function ProjectTableWithStartModal() {
   useEffect(() => {
     if (revealValidations.status === "success") {
       revealValidationsModal.onClose();
-      alert("Validations submitted successfully");
+      alert("Validations revealed successfully");
       revealValidations.reset();
       return;
     }
     if (revealValidations.status === "error") {
       revealValidationsModal.onClose();
       revealValidations.reset();
-      alert("Error submitting validations");
+      alert("Error revealed validations");
       return;
     }
   }, [revealValidations.receiptStatus]);
