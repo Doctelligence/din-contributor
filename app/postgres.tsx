@@ -105,6 +105,47 @@ export async function getProjects(owner: string) {
   return response;
 }
 
+export async function addValidatorCommitment(project: number, validator: string, scores: Record<string, number>) {
+  const sql = neon(POSTGRES_URL as string);
+  const posts = await sql.transaction([
+    sql(
+      `CREATE TABLE IF NOT EXISTS ${TABLE_NAME}_COMMITMENTS (project INT, validator TEXT, contributor TEXT, score INT)`,
+    ),
+    // Delete rows with the same project and validator and a contributor in the new scores
+    sql(
+      `DELETE FROM ${TABLE_NAME}_COMMITMENTS WHERE project = $1 AND validator = $2 AND contributor = ANY($3)`,
+      [project, validator, Object.keys(scores)],
+    ),
+    // Now insert the new scores
+    ...Object.entries(scores).map(([contributor, score]) =>  sql(
+      `INSERT INTO ${TABLE_NAME}_COMMITMENTS (project, validator, contributor, score) VALUES ($1, $2, $3, $4)`,
+      [project, validator, contributor, score],
+    )),
+  ]);
+}
+
+export async function getValidatorCommitments(project: number, validator: string): Promise<Record<string, number>> {
+  const sql = neon(POSTGRES_URL as string);
+
+  // console.log(
+  //   await sql(`SELECT * FROM ${TABLE_NAME}_COMMITMENTS WHERE project = ${project}`),
+  // );
+
+  const [_, response] = await sql.transaction([
+    sql(
+      `CREATE TABLE IF NOT EXISTS ${TABLE_NAME}_COMMITMENTS (project INT, validator TEXT, contributor TEXT, score INT)`,
+    ),
+    sql(`SELECT * FROM ${TABLE_NAME}_COMMITMENTS WHERE project = $1 AND validator = $2`, [project, validator]),
+  ]);
+
+  const scores: Record<string, number> = {};
+  for (const row of response) {
+    scores[row.contributor] = row.score;
+  }
+
+  return scores;
+}
+
 export async function getAllProjects() {
   const sql = neon(POSTGRES_URL as string);
   const posts = await sql.transaction([

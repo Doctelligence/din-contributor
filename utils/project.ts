@@ -150,30 +150,53 @@ export function projectInfoToSensibleTypes(
   projectId: number,
 ) {
   let status: "not started" | "active" | "completed" = "not started";
+  let commitValidations = false;
+
+  const validationCommitmentDeadline = new Date(
+    Number(project.validationCommitmentDeadline) * 1000,
+  );
+  const validationRevealDeadline = new Date(
+    Number(project.validationRevealDeadline) * 1000,
+  );
+
+
+  // console.log(project.validationRevealDeadline.valueOf(÷), Date.now());
 
   if (project.active) {
-    if ((Number(project.validationRevealDeadline.valueOf()) * 1000) >= Date.now())
+    if (validationRevealDeadline > new Date(Date.now())) {
+      if (project.isValidator && (validationCommitmentDeadline < new Date(Date.now()))) {
+        commitValidations = true; 
+      }
       status = "active";
-    else
+    } else {
       status = "completed";
+    }
   }
 
-  return {
+  let res = {
     ...project,
     active: Boolean(project.active),
     contributorRewardAmount: Number(project.contributorRewardAmount),
     validatorRewardAmount: Number(project.validatorRewardAmount),
-    validationCommitmentDeadline: new Date(
-      Number(project.validationCommitmentDeadline) * 1000,
-    ),
-    validationRevealDeadline: new Date(
-      Number(project.validationRevealDeadline) * 1000,
-    ),
+    validationCommitmentDeadline,
+    validationRevealDeadline,
     numContributors: Number(project.numContributors),
     numValidators: Number(project.numValidators),
     totalScore: Number(project.totalScore),
     totalSuccessfulValidations: Number(project.totalSuccessfulValidations),
     projectId,
     status,
+    commitValidations,
   };
+
+
+
+  console.log(
+    res,
+    validationCommitmentDeadline,
+    validationRevealDeadline,
+    new Date(Date.now()),
+  );
+
+  return res;
 }

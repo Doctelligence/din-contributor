@@ -45,6 +45,7 @@ import { SQLContext } from "@/app/providers";
 import {
   appendContributors,
   appendValidators,
+  getValidatorCommitments,
   POSTGRES_URL,
   TABLE_NAME,
 } from "@/app/postgres";
@@ -56,7 +57,7 @@ import {
   SearchIcon,
   VerticalDotsIcon,
 } from "@/components/icons";
-import { useCommitValidations } from "@/hooks/useCommitValidations";
+import { useCommitValidations, useRevealValidations } from "@/hooks/useCommitValidations";
 import { CONTRIBUTOR_NAME, OWNER_NAME, VALIDATOR_NAME } from "@/config/site";
 import { useCollectValidationReward } from "@/hooks/useCollectValidatorReward";
 import { al } from "@upstash/redis/zmscore-Dc6Llqgr";
@@ -106,7 +107,8 @@ export const columns = [
 export const statusOptions: { name: string; uid: ReturnType<typeof projectInfoToSensibleTypes>['status']; active: boolean }[] = [
   { name: "Active", uid: "active", active: true },
   { name: "Not Started", uid: "not started", active: true },
-  { name: "Completed", uid: "completed", active: false },
+  // TODO: Revert this to false
+  { name: "Completed", uid: "completed", active: true },
   // { name: "Vacation", uid: "vacation" },
 ];
 
@@ -128,6 +130,8 @@ const INITIAL_VISIBLE_COLUMNS = [
   "numValidators",
   "active",
   "actions",
+  "validationCommitmentDeadline",
+  "validationRevealDeadline",
 ];
 
 // type User = (typeof projects)[0];
@@ -168,6 +172,9 @@ export default function BaseTable(props: {
     projectId: ReturnType<typeof projectInfoToSensibleTypes>,
   ) => void;
   onCollectValidationReward: (
+    projectId: ReturnType<typeof projectInfoToSensibleTypes>,
+  ) => void;
+  onRevealValidation: (
     projectId: ReturnType<typeof projectInfoToSensibleTypes>,
   ) => void;
 }) {
@@ -418,6 +425,26 @@ export default function BaseTable(props: {
                   ) : (
                     <></>
                   )}
+                  {/* {user.isValidator && !user.commitValidations && user.status === 'active' ? (
+                    <DropdownItem
+                      key="start"
+                      onPress={() => props.onSubmitValidation(user)}
+                    >
+                      Submit Validations
+                    </DropdownItem>
+                  ) : (
+                    <></>
+                  )} */}
+                  {(user.isValidator && (user.validationCommitmentDeadline <= new Date(Date.now())) && (user.validationRevealDeadline >= new Date(Date.now()))) ? (
+                    <DropdownItem
+                      key="start"
+                      onPress={() => props.onRevealValidation(user)}
+                    >
+                      Confirm and Reveal Validations
+                    </DropdownItem>
+                  ) : (
+                    <></>
+                  )}
                   {user.isOwner && !user.active && canStartProject(user) ? (
                     <DropdownItem
                       key="start"
@@ -472,7 +499,7 @@ export default function BaseTable(props: {
                     <></>
                   )}
 
-                  {user.isValidator && user.active && user.status === 'active' ? (
+                  {user.isValidator && user.active && user.status === 'active' && (user.validationCommitmentDeadline >= new Date(Date.now())) ? (
                     <DropdownItem
                       key="submitValidations"
                       onPress={() => props.onSubmitValidation(user)}
@@ -500,7 +527,7 @@ export default function BaseTable(props: {
           return cellValue as string | number | boolean;
       }
     },
-    [],
+    [JSON.stringify(projects)],
   );
 
   const onRowsPerPageChange = React.useCallback(
@@ -890,12 +917,31 @@ const SubmitValidationsForm = (props: {
 
 export function ProjectTableWithStartModal() {
   const { isOpen, onOpen, onClose } = useDisclosure();
+  const account = useAccount();
   const startFormModal = useDisclosure();
   const submitValidationsmodal = useDisclosure();
   const rewardCollectionModal = useDisclosure();
   const collectValidationReward = useCollectValidationReward();
+  const revealValidations = useRevealValidations();
+  const revealValidationsModal = useDisclosure();
   const [project, setProject] =
     React.useState<ReturnType<typeof projectInfoToSensibleTypes>>();
+
+  const revealCallback = useCallback(async (project: ReturnType<typeof projectInfoToSensibleTypes>) => {
+    if (!account.address) {
+      alert("Please connect your wallet");
+      revealValidationsModal.onClose();
+      return;
+    }
+    try {
+      const scores = await getValidatorCommitments(project.projectId, account.address);
+      console.log("scores are", scores);
+      revealValidations.revealValidations(project.projectId, scores);
+    } catch (e) {
+      revealValidationsModal.onClose();
+      alert("Error collecting scores to commit. Error:" + `${e}`);
+    }
+  }, [revealValidations, revealValidations.status, project, account.address]);
 
   useEffect(() => {
     if (collectValidationReward.status === "success") {
@@ -912,6 +958,21 @@ export function ProjectTableWithStartModal() {
     }
   }, [collectValidationReward.receiptStatus]);
 
+  useEffect(() => {
+    if (revealValidations.status === "success") {
+      revealValidationsModal.onClose();
+      alert("Validations submitted successfully");
+      revealValidations.reset();
+      return;
+    }
+    if (revealValidations.status === "error") {
+      revealValidationsModal.onClose();
+      revealValidations.reset();
+      alert("Error submitting validations");
+      return;
+    }
+  }, [revealValidations.receiptStatus]);
+  
   return (
     <>
       <CreateContractModal isOpen={isOpen} onClose={onClose} />
@@ -930,6 +991,13 @@ export function ProjectTableWithStartModal() {
           setProject(_project);
           rewardCollectionModal.onOpen();
           collectValidationReward.collectValidationReward(_project.projectId);
+        }}
+        onRevealValidation={(_project) => {
+          setProject(_project);
+          revealValidationsModal.onOpen();
+          revealCallback(_project);
+
+          // revealValidations.revealValidations(_project.projectId);
         }}
       />
 
