@@ -1037,6 +1037,21 @@ export function ProjectTableWithStartModal() {
       <Modal
         hideCloseButton
         backdrop={"blur"}
+        isOpen={revealValidationsModal.isOpen}
+        onClose={revealValidationsModal.onClose}
+      >
+        <ModalContent>
+          <Spinner
+                          className="bg-opacity-0 border-opacity-0"
+                          color="warning"
+                          label={"Confirming validation scores for " + project?.name}
+                        />
+        </ModalContent>
+      </Modal>
+
+      <Modal
+        hideCloseButton
+        backdrop={"blur"}
         isOpen={rewardCollectionModal.isOpen}
         onClose={rewardCollectionModal.onClose}
       >
